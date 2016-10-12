@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <!--?attr/actionBarSize-->
+    <android.support.v7.widget.CardView
+        app:cardCornerRadius="0dp"
+        app:cardElevation="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:background="@drawable/bgchange"
+        android:paddingTop="25dip"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+            <ImageView
+                android:id="@+id/ivRegisterBack"
+                android:padding="15dp"
+                android:src="@drawable/icback"
+                android:layout_gravity="center"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize" />
+        <TextView
+            android:layout_weight="1"
+            android:id="@+id/tvTitlleRegister"
+            android:text="账号注册" android:textColor="#ffffff"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <View
+            android:layout_width="?attr/actionBarSize"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="昵称"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etRegisterName"
+            android:hint="请输入昵称"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="text"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="3dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="手机号"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etRegisterNumber"
+            android:hint="您的登录账号"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="number"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_marginTop="3dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="所在学校"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etSchool"
+            android:hint="选择你的学校"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="number"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="3dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="学号"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etStuNumber"
+            android:hint="你的学号"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="number"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="3dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="邮箱"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etRegisterEmail"
+            android:hint="将用于身份验证"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="textEmailAddress"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="3dp"
+        android:paddingLeft="10dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="验证码"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etRegisterAuthCode"
+            android:hint="请输入邮箱验证码"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="number"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btGetAuthCode"
+            android:text="获取验证码"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+    <LinearLayout
+        android:paddingLeft="10dp"
+        android:layout_marginTop="3dp"
+        android:orientation="horizontal"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+        <TextView
+            android:text="密码"
+            android:textSize="15sp"
+            android:padding="5dp"
+            android:gravity="center"
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+        <EditText
+            android:id="@+id/etRegisterPassword"
+            android:hint="请输入密码"
+            android:textSize="15sp"
+            android:textColorHint="#cccccc"
+            android:inputType="textPassword"
+            android:singleLine="true"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:layout_weight="5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <View
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"/>
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="47dp"
+        app:cardBackgroundColor="#fc0"
+        app:cardElevation="5dp"
+        app:cardCornerRadius="0dp">
+        <Button
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:text="注  册"
+            android:gravity="center"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:id="@+id/btRegister"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v7.widget.CardView>
+</LinearLayout>

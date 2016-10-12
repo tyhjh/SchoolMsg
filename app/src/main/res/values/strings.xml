@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">SchoolMsg</string>
+    <string name="action_settings">Settings</string>
+    <string name="nointernet">网络连接已断开，请检查网络</string>
+    <string name="share">分享信息已复制到粘贴板</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="textUrl">http://ac-fgtnb2h8.clouddn.com/c8f8ebd90e2aa7072db6.png</string>
+
+    <string name="textUrl1">http://ac-fgtnb2h8.clouddn.com/10959151526549f3e9b3.jpg</string>
+</resources>

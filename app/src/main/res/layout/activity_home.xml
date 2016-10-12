@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.mxn.soul.flowingdrawer_core.LeftDrawerLayout android:id="@+id/id_drawerlayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    android:background="@mipmap/msg_bg"
+    xmlns:include="http://schemas.android.com/apk/res-auto">
+
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <myViews.MyViewPager
+                android:id="@+id/vpHome"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+            </myViews.MyViewPager>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/viewBottombar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="bottom">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                include:cardBackgroundColor="#ffffff"
+                include:cardElevation="8dp">
+
+                <include layout="@layout/bottombar" />
+            </android.support.v7.widget.CardView>
+
+        </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
+
+    <!--menu-->
+    <RelativeLayout
+        android:layout_width="280dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:clipChildren="false"
+        >
+        <com.mxn.soul.flowingdrawer_core.FlowingView
+            android:id="@+id/sv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+        <FrameLayout
+            android:id="@+id/id_container_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            />
+    </RelativeLayout>
+
+
+</com.mxn.soul.flowingdrawer_core.LeftDrawerLayout>
