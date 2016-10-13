@@ -33,6 +33,9 @@
         <activity android:name=".Signup_" />
         <activity android:name=".ChanegPassword_" />
         <activity android:name=".Home_"></activity>
+        <activity android:name=".SendMessage_"
+            android:windowSoftInputMode="adjustResize|stateHidden"
+            />
     </application>
 
 </manifest>

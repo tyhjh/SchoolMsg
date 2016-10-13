@@ -1,15 +1,19 @@
 package adpter;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.tyhj.schoolmsg.R;
+import com.example.tyhj.schoolmsg.SendMessage_;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -41,7 +45,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
     }
 
     @Override
-    public void onBindViewHolder(GroupHolder holder, int position) {
+    public void onBindViewHolder(GroupHolder holder, final int position) {
         Group group=groups.get(position);
         Picasso.with(context).load(group.getGroupImageUrl()).into(holder.iv_headImage);
         holder.tv_group_name.setText(group.getGroupName());
@@ -83,6 +87,16 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
                 Picasso.with(context).load(R.drawable.ic_file_24dp).into(holder.iv_type);
                 break;
         }
+        holder.ll_group.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context, SendMessage_.class);
+                Bundle bundle=new Bundle();
+                bundle.putSerializable("group",groups.get(position));
+                intent.putExtras(bundle);
+                context.startActivity(intent);
+            }
+        });
     }
 
     public void addItem(Group group){
@@ -103,9 +117,11 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
     class GroupHolder extends RecyclerView.ViewHolder{
         ImageView iv_headImage,iv_type;
         ImageView ib_status;
+        LinearLayout ll_group;
         TextView tv_group_name,tv_send_time,tv_who_send,tv_text;
         public GroupHolder(View view) {
             super(view);
+            ll_group= (LinearLayout) view.findViewById(R.id.ll_group);
             iv_headImage= (ImageView) view.findViewById(R.id.iv_headImage);
             iv_type= (ImageView) view.findViewById(R.id.iv_type);
             ib_status= (ImageView) view.findViewById(R.id.iv_status);

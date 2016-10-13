@@ -1,10 +1,12 @@
 package publicinfo;
 
+import java.io.Serializable;
+
 /**
  * Created by Tyhj on 2016/10/12.
  */
 
-public class Group {
+public class Group implements Serializable {
     String  groupImageUrl,groupName,sendTime,text;
     int type,whoSend,status,textCount;
 

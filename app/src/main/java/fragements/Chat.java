@@ -100,7 +100,7 @@ public class Chat extends Fragment {
     @AfterViews
     void afterViews(){
         groups=new ArrayList<Group>();
-        Group group=new Group(getString(R.string.textUrl),"4班","刚刚","哈哈哈哈",0,0,-1,3);
+        Group group=new Group(getString(R.string.textUrl),"4班讨论群","刚刚","哈哈哈哈",0,0,-1,3);
         Group group1=new Group(getString(R.string.textUrl1),"Google Assistant","23:05","你好啊",1,1,1,3);
         groups.add(group);
         groups.add(group1);

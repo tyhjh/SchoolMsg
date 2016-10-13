@@ -69,7 +69,8 @@ public class Login extends AppCompatActivity {
         String name,pas;
         name=etUserNumber.getText().toString();
         pas=etUserPassord.getText().toString();
-        log(name,pas);
+        starActivity();
+        //log(name,pas);
     }
 
     @Background
