@@ -123,7 +123,7 @@ public class SendMessage extends AppCompatActivity {
             if(time!=null){
                 chatAdpter.add(new Msg_chat(0,0,0,time,null,null,null,MyFunction.getTime()));
             }
-            chatAdpter.add(new Msg_chat(1,0,0,et_text_send.getText().toString(),null,null,"tyhj",MyFunction.getTime()));
+            chatAdpter.add(new Msg_chat(1,0,1,et_text_send.getText().toString(),null,null,"tyhj",MyFunction.getTime()));
             et_text_send.setText("");
         }
     }
@@ -176,4 +176,5 @@ public class SendMessage extends AppCompatActivity {
         new SharedData(SendMessage.this).saveData(chatAdpter.getMsg_chats(),group.getGroupName());
         super.onBackPressed();
     }
+
 }

@@ -1,9 +1,11 @@
 package adpter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,13 +15,19 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.tyhj.schoolmsg.R;
+import com.example.tyhj.schoolmsg.SendMessage;
 import com.example.tyhj.schoolmsg.SendMessage_;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import fragements.Msg;
+import myViews.SharedData;
 import publicinfo.Group;
+import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
+
+import static android.content.ContentValues.TAG;
 
 /**
  * Created by Tyhj on 2016/10/12.
@@ -46,56 +54,64 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
 
     @Override
     public void onBindViewHolder(GroupHolder holder, final int position) {
+        Msg_chat msg_chat = null;
+        holder.tv_msgCount.setVisibility(View.VISIBLE);
+        holder.ib_status.setVisibility(View.VISIBLE);
         Group group=groups.get(position);
         Picasso.with(context).load(group.getGroupImageUrl()).into(holder.iv_headImage);
         holder.tv_group_name.setText(group.getGroupName());
-        holder.tv_send_time.setText(group.getSendTime());
-        holder.tv_text.setText(group.getText());
         holder.ib_status.setClipToOutline(true);
         holder.ib_status.setOutlineProvider(MyFunction.getOutline(true,40,0));
         holder.iv_headImage.setClipToOutline(true);
         holder.iv_headImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
-        if(group.getWhoSend()==0)
-        holder.tv_who_send.setText("你：");
-        //消息状态
-        switch (group.getStatus()){
-            //发送成功
-            case -1:
-                holder.tv_msgCount.setVisibility(View.GONE);
-                Picasso.with(context).load(R.drawable.ic_sent).into(holder.ib_status);
-                break;
+        List<Msg_chat> msgChatList=new SharedData(context).getData(group.getGroupName());
+        if(msgChatList!=null) {
+            msg_chat = msgChatList.get(msgChatList.size() - 1);
+            holder.tv_send_time.setText(MyFunction.getTime2(msg_chat.getTime()));
+            holder.tv_text.setText(msg_chat.getText());
+            if(msg_chat.getWho()==1)
+                holder.tv_who_send.setText("你：");
+            //消息状态
+            switch (msg_chat.getStatus()){
+                //发送成功
+                case -1:
+                    holder.tv_msgCount.setVisibility(View.GONE);
+                    Picasso.with(context).load(R.drawable.ic_sent).into(holder.ib_status);
+                    break;
+                //有消息
+                case 0:
+                    holder.ib_status.setVisibility(View.GONE);
+                    holder.tv_msgCount.setText(group.getTextCount()+"");
+                    break;
+                //发送中
+                case 1:
+                    holder.tv_msgCount.setVisibility(View.GONE);
+                    Picasso.with(context).load(R.drawable.ic_sending).into(holder.ib_status);
+                    break;
+                //接受成功
+                case 2:
+                    holder.tv_msgCount.setVisibility(View.GONE);
+                    Picasso.with(context).load(R.drawable.ic_read).into(holder.ib_status);
+                    break;
+            }
+            switch (msg_chat.getType()){
+                case 0:
 
-            //有消息
-            case 0:
-                holder.ib_status.setVisibility(View.GONE);
-                holder.tv_msgCount.setText(group.getTextCount()+"");
-                break;
-            //发送中
-            case 1:
-                holder.tv_msgCount.setVisibility(View.GONE);
-                Picasso.with(context).load(R.drawable.ic_sending).into(holder.ib_status);
-                break;
-            //接受成功
-            case 2:
-                holder.tv_msgCount.setVisibility(View.GONE);
-                Picasso.with(context).load(R.drawable.ic_read).into(holder.ib_status);
-                break;
+                    break;
+                case 1:
+                    Picasso.with(context).load(R.drawable.ic_camera_24dp).into(holder.iv_type);
+                    break;
+                case 2:
+                    Picasso.with(context).load(R.drawable.ic_mic_24dp).into(holder.iv_type);
+                    break;
+                case 3:
+                    Picasso.with(context).load(R.drawable.ic_file_24dp).into(holder.iv_type);
+                    break;
+            }
+        }else {
+            holder.tv_msgCount.setVisibility(View.GONE);
         }
 
-        switch (group.getType()){
-            case 0:
-
-                break;
-            case 1:
-                Picasso.with(context).load(R.drawable.ic_camera_24dp).into(holder.iv_type);
-                break;
-            case 2:
-                Picasso.with(context).load(R.drawable.ic_mic_24dp).into(holder.iv_type);
-                break;
-            case 3:
-                Picasso.with(context).load(R.drawable.ic_file_24dp).into(holder.iv_type);
-                break;
-        }
         holder.ll_group.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,6 +120,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
                 bundle.putSerializable("group",groups.get(position));
                 intent.putExtras(bundle);
                 context.startActivity(intent);
+//                ((Activity)context).finish();
             }
         });
     }

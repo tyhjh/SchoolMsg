@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -101,8 +102,8 @@ public class Chat extends Fragment {
     void afterViews(){
         groups=new ArrayList<Group>();
         Group group=new Group(getString(R.string.textUrl),"4班讨论群","刚刚","哈哈哈哈",0,0,-1,3);
-        Group group1=new Group(getString(R.string.textUrl1),"Google Assistant","23:05","你好啊",1,1,1,3);
-        Group group2=new Group(getString(R.string.textUrl4),"Tyhj","23:05","你好啊",1,1,0,3);
+        Group group1=new Group(getString(R.string.textUrl1),"Google Assistant","23:05","你好啊",1,1,1,1);
+        Group group2=new Group(getString(R.string.textUrl4),"Tyhj","23:05","你好啊",1,1,0,2);
         groups.add(group);
         groups.add(group1);
         groups.add(group2);
@@ -113,9 +114,15 @@ public class Chat extends Fragment {
         rcly_qun.setItemAnimator(new DefaultItemAnimator());
     }
 
-
     public void setShowMenu(ShowMenu showMenu){
         this.showMenu=showMenu;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if(groupAdapter!=null){
+            groupAdapter.notifyDataSetChanged();
+        }
+    }
 }

@@ -79,6 +79,12 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                 viewHolder.text.setText(msg_chat.getText());
             }
 
+        for(int i=msg_chats.size()-1;i>=0;i--){
+            if(msg_chats.get(i).getWho()==0){
+                msg_chats.get(i).setText(MyFunction.getTime2(msg_chats.get(i).getTime()));
+                break;
+            }
+        }
 
         return view;
     }

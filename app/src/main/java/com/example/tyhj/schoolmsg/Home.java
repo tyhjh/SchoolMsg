@@ -29,6 +29,7 @@ import myinterface.ShowMenu;
 @EActivity(R.layout.activity_home)
 public class Home extends AppCompatActivity implements ShowMenu{
     private int TAB_COUNT=4;
+    Chat chat;
     private LeftDrawerLayout mLeftDrawerLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +44,7 @@ public class Home extends AppCompatActivity implements ShowMenu{
 
     @AfterViews
     void afterViews(){
-        final Chat chat=new Chat_();
+        chat=new Chat_();
         chat.setShowMenu(Home.this);
         setInitColor();
         initdrawerLayout();
@@ -163,4 +164,5 @@ public class Home extends AppCompatActivity implements ShowMenu{
             super.onBackPressed();
         }
     }
+
 }

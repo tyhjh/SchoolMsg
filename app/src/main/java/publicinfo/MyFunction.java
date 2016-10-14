@@ -112,6 +112,8 @@ public class MyFunction {
             return ("昨天 • "+str.substring(4,6)+":"+str.substring(6,8));
         }else if(ca2>1){
             return (str.substring(0,2)+"月"+str.substring(2,4)+"日 "+str.substring(4,6)+":"+str.substring(6,8));
+        }else if(ca<=10){
+            return ("刚刚");
         }else if(ca<500){
             return (str.substring(4,6)+":"+str.substring(6,8));
         }else {
