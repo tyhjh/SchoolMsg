@@ -12,7 +12,9 @@ import android.view.ViewOutlineProvider;
 import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.R;
+import com.tyhj.myfist_2016_6_29.MyTime;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,5 +92,35 @@ public class MyFunction {
         if(!is)
             Toast.makeText(context,"请输入正确的Email地址",Toast.LENGTH_SHORT).show();
         return is;
+    }
+    //获取时间
+    public static String getTime(int time){
+        int ca=getTime()-time;
+        if(ca<10){
+            return null;
+        }else if(ca>10){
+            return "刚刚";
+        }
+        return null;
+    }
+
+    public static String getTime2(int time){
+        int ca=getTime()-time;
+        int ca2=(getTime()/10000)-(time/10000);
+        String str=time+"";
+        if(ca2==1){
+            return ("昨天 • "+str.substring(4,6)+":"+str.substring(6,8));
+        }else if(ca2>1){
+            return (str.substring(0,2)+"月"+str.substring(2,4)+"日 "+str.substring(4,6)+":"+str.substring(6,8));
+        }else if(ca<500){
+            return (str.substring(4,6)+":"+str.substring(6,8));
+        }else {
+            return ("今天 • "+str.substring(4,6)+":"+str.substring(6,8));
+        }
+    }
+
+    public static int getTime(){
+        MyTime myTime=new MyTime();
+        return Integer.parseInt(myTime.getMonth()+myTime.getDays()+myTime.getHour()+myTime.getMinute());
     }
 }

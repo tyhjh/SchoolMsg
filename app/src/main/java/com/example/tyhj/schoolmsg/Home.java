@@ -35,7 +35,6 @@ public class Home extends AppCompatActivity implements ShowMenu{
         super.onCreate(savedInstanceState);
     }
 
-
     @ViewById
     ImageView btnHome1,btnHome2,btnHome3,btnHome4;
 
@@ -155,7 +154,6 @@ public class Home extends AppCompatActivity implements ShowMenu{
     public void showMenu() {
         mLeftDrawerLayout.openDrawer();
     }
-
 
     @Override
     public void onBackPressed() {

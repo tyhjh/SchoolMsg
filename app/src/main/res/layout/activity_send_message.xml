@@ -57,6 +57,7 @@
     </android.support.v7.widget.CardView>
 
     <ListView
+        android:divider="@null"
         android:transcriptMode="normal"
         android:id="@+id/lv_msg"
         android:layout_width="match_parent"
@@ -89,7 +90,7 @@
             <EditText
                 android:id="@+id/et_text_send"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="15dp"
                 android:layout_weight="1"
                 android:background="@null"
@@ -119,7 +120,7 @@
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:clickable="true"
                 android:padding="3dp"
-                android:src="@drawable/ic_send_24dp" />
+                android:src="@drawable/ic_mic_gray_24dp" />
 
         </LinearLayout>
     </android.support.v7.widget.CardView>

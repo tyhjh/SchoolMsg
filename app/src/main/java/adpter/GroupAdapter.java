@@ -61,15 +61,24 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         switch (group.getStatus()){
             //发送成功
             case -1:
+                holder.tv_msgCount.setVisibility(View.GONE);
                 Picasso.with(context).load(R.drawable.ic_sent).into(holder.ib_status);
                 break;
+
             //有消息
             case 0:
-
+                holder.ib_status.setVisibility(View.GONE);
+                holder.tv_msgCount.setText(group.getTextCount()+"");
                 break;
             //发送中
             case 1:
+                holder.tv_msgCount.setVisibility(View.GONE);
                 Picasso.with(context).load(R.drawable.ic_sending).into(holder.ib_status);
+                break;
+            //接受成功
+            case 2:
+                holder.tv_msgCount.setVisibility(View.GONE);
+                Picasso.with(context).load(R.drawable.ic_read).into(holder.ib_status);
                 break;
         }
 
@@ -118,7 +127,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         ImageView iv_headImage,iv_type;
         ImageView ib_status;
         LinearLayout ll_group;
-        TextView tv_group_name,tv_send_time,tv_who_send,tv_text;
+        TextView tv_group_name,tv_send_time,tv_who_send,tv_text,tv_msgCount;
         public GroupHolder(View view) {
             super(view);
             ll_group= (LinearLayout) view.findViewById(R.id.ll_group);
@@ -129,6 +138,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             tv_send_time= (TextView) view.findViewById(R.id.tv_send_time);
             tv_who_send= (TextView) view.findViewById(R.id.tv_who_send);
             tv_text= (TextView) view.findViewById(R.id.tv_text);
+            tv_msgCount= (TextView) view.findViewById(R.id.tv_msgCount);
         }
     }
 }

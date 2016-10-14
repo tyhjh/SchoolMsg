@@ -9,7 +9,6 @@ import java.io.Serializable;
 public class Group implements Serializable {
     String  groupImageUrl,groupName,sendTime,text;
     int type,whoSend,status,textCount;
-
     public Group(String groupImageUrl, String groupName, String sendTime, String text, int type, int whoSend, int status,int textCount) {
         this.groupImageUrl = groupImageUrl;
         this.groupName = groupName;
