@@ -1,5 +1,6 @@
 package com.example.tyhj.schoolmsg;
 
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.mxn.soul.flowingdrawer_core.FlowingView;
 import com.mxn.soul.flowingdrawer_core.LeftDrawerLayout;
@@ -16,6 +18,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import fragements.Chat;
 import fragements.Chat_;
@@ -25,15 +28,21 @@ import fragements.MyTools;
 import fragements.Pager2;
 import myViews.MyViewPager;
 import myinterface.ShowMenu;
+import publicinfo.MyFunction;
+import service.ChatService;
 
 @EActivity(R.layout.activity_home)
 public class Home extends AppCompatActivity implements ShowMenu{
     private int TAB_COUNT=4;
+    private long exitTime = 0;
     Chat chat;
     private LeftDrawerLayout mLeftDrawerLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Intent intent=new Intent(this, ChatService.class);
+        startService(intent);
+        MyFunction.setContext(this);
     }
 
     @ViewById
@@ -102,6 +111,7 @@ public class Home extends AppCompatActivity implements ShowMenu{
             }
         });
 
+
     }
 
     @Click(R.id.btnHome1)
@@ -161,7 +171,16 @@ public class Home extends AppCompatActivity implements ShowMenu{
         if (mLeftDrawerLayout.isShownMenu()) {
             mLeftDrawerLayout.closeDrawer();
         } else {
-            super.onBackPressed();
+            if ((System.currentTimeMillis() - exitTime) > 2000) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                if(MyFunction.getUser()!=null)
+                    MyFunction.getUser().logout();
+                Intent intent=new Intent(this, ChatService.class);
+                stopService(intent);
+               this.finish();
+            }
         }
     }
 

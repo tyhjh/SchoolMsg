@@ -66,7 +66,7 @@ public class XmppConnection{
         try {  
             if (null == connection || !connection.isAuthenticated()) {  
 //                XMPPConnection.DEBUG_ENABLED = false;// ����DEBUGģʽ 
-                XMPPConnection.DEBUG_ENABLED = true;// ����DEBUGģʽ 
+                XMPPConnection.DEBUG_ENABLED = false;// ����DEBUGģʽ
                 // ��������  
                 ConnectionConfiguration config = new ConnectionConfiguration(  
                         SERVER_HOST, SERVER_PORT, SERVER_NAME);  

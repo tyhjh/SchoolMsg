@@ -55,6 +55,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
     @Override
     public void onBindViewHolder(GroupHolder holder, final int position) {
         Msg_chat msg_chat = null;
+        holder.iv_type.setVisibility(View.VISIBLE);
         holder.tv_msgCount.setVisibility(View.VISIBLE);
         holder.ib_status.setVisibility(View.VISIBLE);
         Group group=groups.get(position);
@@ -71,6 +72,8 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             holder.tv_text.setText(msg_chat.getText());
             if(msg_chat.getWho()==1)
                 holder.tv_who_send.setText("你：");
+            else
+                holder.tv_who_send.setText("");
             //消息状态
             switch (msg_chat.getStatus()){
                 //发送成功
@@ -81,7 +84,13 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
                 //有消息
                 case 0:
                     holder.ib_status.setVisibility(View.GONE);
-                    holder.tv_msgCount.setText(group.getTextCount()+"");
+                    for(int i=msgChatList.size()-1;i>=0;i--){
+                        if(msgChatList.get(i).getWho()!=2||msgChatList.get(i).getStatus()!=0){
+                            holder.tv_msgCount.setText(msgChatList.size()-1-i+"");
+                            break;
+                        }
+                        holder.tv_msgCount.setText("1");
+                    }
                     break;
                 //发送中
                 case 1:
@@ -91,21 +100,24 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
                 //接受成功
                 case 2:
                     holder.tv_msgCount.setVisibility(View.GONE);
-                    Picasso.with(context).load(R.drawable.ic_read).into(holder.ib_status);
+                    holder.ib_status.setVisibility(View.GONE);
                     break;
             }
             switch (msg_chat.getType()){
                 case 0:
-
+                    holder.iv_type.setVisibility(View.GONE);
                     break;
                 case 1:
-                    Picasso.with(context).load(R.drawable.ic_camera_24dp).into(holder.iv_type);
+                    holder.iv_type.setImageResource(R.drawable.ic_camera_24dp);
+                    holder.tv_text.setText("图片");
                     break;
                 case 2:
-                    Picasso.with(context).load(R.drawable.ic_mic_24dp).into(holder.iv_type);
+                    holder.iv_type.setImageResource(R.drawable.ic_mic_24dp);
+                    holder.tv_text.setText("语音");
                     break;
                 case 3:
-                    Picasso.with(context).load(R.drawable.ic_file_24dp).into(holder.iv_type);
+                    holder.iv_type.setImageResource(R.drawable.ic_file_24dp);
+                    holder.tv_text.setText("文件");
                     break;
             }
         }else {

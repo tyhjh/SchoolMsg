@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Scanner;
 
+import org.apache.commons.logging.Log;
 import org.jivesoftware.smack.AccountManager;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
@@ -39,6 +40,7 @@ import org.jivesoftware.smackx.filetransfer.OutgoingFileTransfer;
 import org.jivesoftware.smackx.packet.VCard;
 import org.jivesoftware.smackx.search.UserSearchManager;
 
+import apis.connection.XmppConnection;
 import apis.util.File2Bytes;
 
 
@@ -47,26 +49,33 @@ import apis.util.File2Bytes;
  * 
  * */
 public class User {
-	
-	private XMPPConnection connection = null;
+
+    private XmppConnection connection = null;
+	private XMPPConnection connection1 = null;
 	
 	/**
 	 * 	���췽��
 	 * @param connect xmpp����
 	 * */
-	public User(XMPPConnection connection){
+	public User(XmppConnection connection){
 		this.connection = connection;
+        connection1=connection.getConnection();
 	}
 	
 	/**
 	 * ��ȡ����
 	 * */
-	public XMPPConnection getXmppConnection(){
+	public XmppConnection getXmppConnection(){
 		if(connection!=null)
 			return connection;
 		return null;
 	}
-	
+
+    public void logout(){
+        if(connection!=null){
+            connection.getInstance().closeConnection();
+        }
+    }
     /** 
      * ��¼ 
      *  
@@ -78,12 +87,12 @@ public class User {
      */  
     public boolean login(String account, String password) {  
         try {  
-            if (connection == null)  
-                return false;  
-            connection.login(account, password);  
+            if (connection1 == null)
+                return false;
+            connection1.login(account, password);
             // �����ھQ��B  
-            Presence presence = new Presence(Presence.Type.available);  
-           connection.sendPacket(presence);  
+            Presence presence = new Presence(Presence.Type.available);
+            connection1.sendPacket(presence);
             // ����B�ӱO  
             
 //            connectionListener = new TaxiConnectionListener();  
@@ -106,10 +115,10 @@ public class User {
      * @return 1��ע��ɹ� 0��������û�з��ؽ��2��ע��ʧ�� 
      */  
     public String regist(String account, String password) {  
-        if (connection == null)  
+        if (connection1 == null)
             return "0";  
         
-        AccountManager manager = new AccountManager(connection);
+        AccountManager manager = new AccountManager(connection1);
         try {
 			manager.createAccount(account, password);
 		} catch (XMPPException e) {
@@ -155,11 +164,11 @@ public class User {
     /** 
      * �����û�״̬ 
      */  
-    public void setPresence(int code) {  
-        XMPPConnection con = connection;  
+    public void setPresence(int code) {
+        XMPPConnection con = connection1;
         if (con == null)  
-            return;  
-        Presence presence;  
+            return;
+        Presence presence;
         switch (code) {  
         case 0:  
             presence = new Presence(Presence.Type.available);  
@@ -210,7 +219,7 @@ public class User {
             break;  
         default:  
             break;  
-        }  
+        }
     }  
     
     /** 
@@ -219,10 +228,10 @@ public class User {
      * @return �����鼯�� 
      */  
     public List<RosterGroup> getGroups() {  
-        if (connection == null)  
+        if (connection1 == null)
             return null;  
         List<RosterGroup> grouplist = new ArrayList<RosterGroup>();  
-        Collection<RosterGroup> rosterGroup =connection.getRoster()  
+        Collection<RosterGroup> rosterGroup =connection1.getRoster()
                 .getGroups();  
         Iterator<RosterGroup> i = rosterGroup.iterator();  
         while (i.hasNext()) {  
@@ -240,10 +249,10 @@ public class User {
      * @return 
      */  
     public List<RosterEntry> getEntriesByGroup(String groupName) {  
-        if (connection == null)  
+        if (connection1 == null)
             return null;  
         List<RosterEntry> Entrieslist = new ArrayList<RosterEntry>();  
-        RosterGroup rosterGroup = connection.getRoster().getGroup(  
+        RosterGroup rosterGroup = connection1.getRoster().getGroup(
                 groupName);  
         Collection<RosterEntry> rosterEntry = rosterGroup.getEntries();  
         Iterator<RosterEntry> i = rosterEntry.iterator();  
@@ -260,10 +269,10 @@ public class User {
      * @return 
      */  
     public List<RosterEntry> getAllEntries() {  
-        if (connection == null)  
+        if (connection1 == null)
             return null;  
         List<RosterEntry> Entrieslist = new ArrayList<RosterEntry>();  
-        Collection<RosterEntry> rosterEntry = connection.getRoster()  
+        Collection<RosterEntry> rosterEntry = connection1.getRoster()
                 .getEntries();  
         Iterator<RosterEntry> i = rosterEntry.iterator();  
         while (i.hasNext()) {  
@@ -281,11 +290,11 @@ public class User {
      * @throws XMPPException 
      */  
     public VCard getUserVCard(String user) {  
-        if (connection == null)  
+        if (connection1 == null)
             return null;  
         VCard vcard = new VCard();  
         try {  
-            vcard.load(connection, user);  
+            vcard.load(connection1, user);
         } catch (XMPPException e) {  
             e.printStackTrace();  
         }  
@@ -331,10 +340,10 @@ public class User {
      * @return 
      */  
     public boolean addGroup(String groupName) {  
-        if (connection == null)  
+        if (connection1 == null)
             return false;  
         try {  
-            connection.getRoster().createGroup(groupName);  
+            connection1.getRoster().createGroup(groupName);
 //            Log.v("addGroup", groupName + "�����ɹ�");  
             return true;  
         } catch (Exception e) {  
@@ -361,10 +370,10 @@ public class User {
      * @return 
      */  
     public boolean addUser(String userName, String name) {  
-        if (connection == null)  
+        if (connection1 == null)
             return false;  
         try {  
-        	connection.getRoster().createEntry(userName, name, null);  
+        	connection1.getRoster().createEntry(userName, name, null);
             return true;  
         } catch (Exception e) {  
             e.printStackTrace();  
@@ -381,14 +390,14 @@ public class User {
      * @return 
      */  
     public boolean addUser(String userName, String name, String groupName) {  
-        if (connection == null)  
+        if (connection1 == null)
             return false;  
         try {  
             Presence subscription = new Presence(Presence.Type.subscribed);  
             subscription.setTo(userName);  
-            userName += "@" + connection.getServiceName();  
-            connection.sendPacket(subscription);  
-            connection.getRoster().createEntry(userName, name,  
+            userName += "@" + connection1.getServiceName();
+            connection1.sendPacket(subscription);
+            connection1.getRoster().createEntry(userName, name,
                     new String[] { groupName });  
             return true;  
         } catch (Exception e) {  
@@ -404,18 +413,18 @@ public class User {
      * @return 
      */  
     public boolean removeUser(String userName) {  
-        if (connection == null)  
+        if (connection1 == null)
             return false;  
         try {  
             RosterEntry entry = null;  
             if (userName.contains("@"))  
-                entry = connection.getRoster().getEntry(userName);  
+                entry = connection1.getRoster().getEntry(userName);
             else  
-                entry = connection.getRoster().getEntry(  
-                        userName + "@" + connection.getServiceName());  
+                entry = connection1.getRoster().getEntry(
+                        userName + "@" + connection1.getServiceName());
             if (entry == null)  
-                entry = connection.getRoster().getEntry(userName);  
-            connection.getRoster().removeEntry(entry);  
+                entry = connection1.getRoster().getEntry(userName);
+            connection1.getRoster().removeEntry(entry);
   
             return true;  
         } catch (Exception e) {  
@@ -432,22 +441,22 @@ public class User {
      * @throws XMPPException 
      */  
     public List<HashMap<String, String>> searchUsers(String userName) {  
-        if (connection == null)  
+        if (connection1 == null)
             return null;  
         HashMap<String, String> user = null;  
         List<HashMap<String, String>> results = new ArrayList<HashMap<String, String>>();  
         try {  
-            new ServiceDiscoveryManager(connection);  
+            new ServiceDiscoveryManager(connection1);
   
-            UserSearchManager usm = new UserSearchManager(connection);  
+            UserSearchManager usm = new UserSearchManager(connection1);
   
-            Form searchForm = usm.getSearchForm(connection  
+            Form searchForm = usm.getSearchForm(connection1
                     .getServiceName());  
             Form answerForm = searchForm.createAnswerForm();  
             answerForm.setAnswer("userAccount", true);  
             answerForm.setAnswer("userPhote", userName);  
             ReportedData data = usm.getSearchResults(answerForm, "search"  
-                    + connection.getServiceName());  
+                    + connection1.getServiceName());
   
             Iterator<Row> it = data.getRows();  
             Row row = null;  
@@ -472,15 +481,15 @@ public class User {
     /** 
      * �޸����� 
      *  
-     * @param connection 
+     * @param connection
      * @param status 
      */  
     public void changeStateMessage(String status) {  
-        if (connection == null)  
+        if (connection1 == null)
             return;  
         Presence presence = new Presence(Presence.Type.available);  
         presence.setStatus(status);  
-        connection.sendPacket(presence);  
+        connection1.sendPacket(presence);
     }  
   
     /** 
@@ -489,11 +498,11 @@ public class User {
      * @param file 
      */  
     public boolean changeImage(File file) {  
-        if (connection == null)  
+        if (connection1 == null)
             return false;  
         try {  
             VCard vcard = new VCard();  
-            vcard.load(connection);  
+            vcard.load(connection1);
   
             byte[] bytes;  
   
@@ -510,7 +519,7 @@ public class User {
             
 //            FormatTools.getInstance().InputStream2Bitmap(bais);  
   
-            vcard.save(connection);  
+            vcard.save(connection1);
             return true;  
         } catch (Exception e) {  
             e.printStackTrace();  
@@ -524,10 +533,10 @@ public class User {
      * @return 
      */  
     public boolean deleteAccount() {  
-        if (connection== null)  
+        if (connection1== null)
             return false;  
         try {  
-            connection.getAccountManager().deleteAccount();  
+            connection1.getAccountManager().deleteAccount();
             return true;  
         } catch (XMPPException e) {  
             return false;  
@@ -540,10 +549,10 @@ public class User {
      * @return 
      */  
     public boolean changePassword(String pwd) {  
-        if (connection == null)  
+        if (connection1 == null)
             return false;  
         try {  
-            connection.getAccountManager().changePassword(pwd);  
+            connection1.getAccountManager().changePassword(pwd);
             return true;  
         } catch (XMPPException e) {  
             return false;  
@@ -557,10 +566,10 @@ public class User {
      * @param filePath 
      */  
     public void sendFile(String user, String filePath) {  
-        if (connection == null)  
+        if (connection1 == null)
             return;  
         // �����ļ����������  
-        FileTransferManager manager = new FileTransferManager(connection);  
+        FileTransferManager manager = new FileTransferManager(connection1);
   
         // ����������ļ�����  
         OutgoingFileTransfer transfer = manager  
@@ -578,12 +587,9 @@ public class User {
      * ��ȡ����ChatManager��
      * */
     public ChatManager getChatManager(){
-    	ChatManager chatmanager = connection.getChatManager();
+    	ChatManager chatmanager = connection1.getChatManager();
     	return chatmanager;
     }
-    
-    public static void main(String[] args) {
-   
-	}
+
 }
 

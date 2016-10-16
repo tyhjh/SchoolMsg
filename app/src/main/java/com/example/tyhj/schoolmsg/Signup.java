@@ -67,7 +67,7 @@ public class Signup extends AppCompatActivity {
     }
     @Background
     void regs(String name,String pas) {
-        User user = new User(XmppConnection.getInstance().getConnection());
+        User user = new User(XmppConnection.getInstance());
         if(user.regist(name, pas).equals("1"))
             Toast("注册成功");
         else

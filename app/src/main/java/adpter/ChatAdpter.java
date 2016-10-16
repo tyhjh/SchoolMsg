@@ -25,13 +25,20 @@ import static android.content.ContentValues.TAG;
  */
 
 public class ChatAdpter extends ArrayAdapter<Msg_chat> {
-
+    String headImage;
     List<Msg_chat> msg_chats;
     public ChatAdpter(Context context, int resource, List<Msg_chat> objects) {
         super(context, resource, objects);
         msg_chats=objects;
     }
 
+    public String getHeadImage() {
+        return headImage;
+    }
+
+    public void setHeadImage(String headImage) {
+        this.headImage = headImage;
+    }
 
     @NonNull
     @Override
@@ -46,13 +53,12 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                 viewHolder.text= (TextView) view.findViewById(R.id.tv_mytext);
                 viewHolder.image= (ImageView) view.findViewById(R.id.iv_myimage);
                 if(msg_chat.getType()==0){
-
                     viewHolder.text.setText(msg_chat.getText());
                 }else if(msg_chat.getType()==1){
                     viewHolder.text.setVisibility(View.GONE);
                     Picasso.with(getContext()).load(msg_chat.getImageUrl()).into(viewHolder.image);
                 }
-                if(msg_chat.getStatus()==0){
+                if(msg_chat.getStatus()==-1){
                     Picasso.with(getContext()).load(R.drawable.ic_sent).into(viewHolder.status);
                 }else {
                     Picasso.with(getContext()).load(R.drawable.ic_sending).into(viewHolder.status);
@@ -65,7 +71,7 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                 viewHolder.headImage= (ImageView) view.findViewById(R.id.iv_yourheadImage);
                 viewHolder.headImage.setClipToOutline(true);
                 viewHolder.headImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
-                Picasso.with(getContext()).load(msg_chat.getHeadImageUrl()).into(viewHolder.headImage);
+                Picasso.with(getContext()).load(getHeadImage()).into(viewHolder.headImage);
                 if(msg_chat.getType()==0){
                     viewHolder.text.setText(msg_chat.getText());
                 }else if(msg_chat.getType()==1){
@@ -81,8 +87,9 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
 
         for(int i=msg_chats.size()-1;i>=0;i--){
             if(msg_chats.get(i).getWho()==0){
-                msg_chats.get(i).setText(MyFunction.getTime2(msg_chats.get(i).getTime()));
+                if(msg_chats.get(i).getText().contains("月"))
                 break;
+                msg_chats.get(i).setText(MyFunction.getTime2(msg_chats.get(i).getTime()));
             }
         }
 
@@ -93,15 +100,14 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
 
         notifyDataSetChanged();
     }
-
     @Override
     public void add(Msg_chat object) {
         if(object.getWho()==0){
             for(int i=msg_chats.size()-1;i>=0;i--){
                 if(msg_chats.get(i).getWho()==0){
+                    if(msg_chats.get(i).getText().contains("月"))
+                        break;
                     msg_chats.get(i).setText(MyFunction.getTime2(msg_chats.get(i).getTime()));
-                    Log.e(TAG, "add: 改时间成功啦xxxxxxx"+msg_chats.get(i).getText()+msg_chats.get(i).getTime());
-                    break;
                 }
             }
         }
@@ -112,6 +118,15 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
         return  msg_chats;
     }
 
+    public void update(){
+        for(int i=msg_chats.size()-1;i>=0;i--){
+            if(msg_chats.get(i).getStatus()==-1&&msg_chats.get(i).getWho()==1){
+                break;
+            }else if(msg_chats.get(i).getWho()==1&&msg_chats.get(i).getStatus()==1){
+                msg_chats.get(i).setStatus(-1);
+            }
+        }
+    }
 
     @Override
     public int getCount() {

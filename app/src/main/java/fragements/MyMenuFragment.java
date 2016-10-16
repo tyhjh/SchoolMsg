@@ -23,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.tyhj.schoolmsg.Login;
+import com.example.tyhj.schoolmsg.Login_;
 import com.example.tyhj.schoolmsg.R;
 import com.mxn.soul.flowingdrawer_core.MenuFragment;
 import com.squareup.picasso.Picasso;
@@ -89,7 +91,14 @@ public class MyMenuFragment extends MenuFragment {
                     case R.id.menu_share:
                       Toast.makeText(getActivity(),getString(R.string.share), Toast.LENGTH_SHORT).show();
                         break;
-                    case R.id.menu_out:
+
+                    case R.id.menu_logout:
+                        if(MyFunction.getUser()!=null)
+                        MyFunction.getUser().logout();
+                        startActivity(new Intent(getActivity(), Login_.class));
+                        getActivity().finish();
+                        break;
+                    case R.id.menu_about:
                         //删除数据
                         break;
                 }

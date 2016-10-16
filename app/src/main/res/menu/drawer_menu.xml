@@ -31,7 +31,11 @@
             android:icon="@drawable/ic_share"
             android:title="分享" />
         <item
-            android:id="@+id/menu_out"
+            android:id="@+id/menu_logout"
+            android:icon="@drawable/ic_logout_24dp"
+            android:title="退出登录" />
+        <item
+            android:id="@+id/menu_about"
             android:icon="@drawable/ic_global_menu_popular"
             android:title="关于" />
     </group>

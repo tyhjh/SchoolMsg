@@ -12,19 +12,38 @@ import android.view.ViewOutlineProvider;
 import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.R;
+import com.example.tyhj.schoolmsg.SendMessage;
 import com.tyhj.myfist_2016_6_29.MyTime;
+
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smackx.muc.MultiUserChat;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import apis.userAndRoom.User;
+import myViews.SharedData;
 
 /**
  * Created by Tyhj on 2016/10/9.
  */
 
 public class MyFunction {
+    public static MultiUserChat multiUserChat;
+
+    public static MultiUserChat getMultiUserChat() {
+        return multiUserChat;
+    }
+
+    public static void setMultiUserChat(MultiUserChat multiUserChat) {
+        MyFunction.multiUserChat = multiUserChat;
+    }
+
+    private static String chatName;
 
     private static User user;
 
@@ -34,6 +53,23 @@ public class MyFunction {
 
     public static void setUser(User user) {
         MyFunction.user = user;
+    }
+
+    private static Context context;
+
+    public static Context getContext() {
+        return context;
+    }
+
+    public static String getChatName() {
+        return chatName;
+    }
+
+    public static void setChatName(String chatName) {
+        MyFunction.chatName = chatName;
+    }
+    public static void setContext(Context context) {
+        MyFunction.context = context;
     }
 
     //轮廓

@@ -1,6 +1,11 @@
 package com.example.tyhj.schoolmsg;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.nfc.Tag;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -20,15 +25,23 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 import com.tyhj.myfist_2016_6_29.MyTime;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManager;
+import org.jivesoftware.smack.ChatManagerListener;
+import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +58,8 @@ import publicinfo.MyFunction;
 
 @EActivity(R.layout.activity_send_message)
 public class SendMessage extends AppCompatActivity {
+    IntentFilter intentFilter;
+    MsgBoradCastReceiver msgBoradCastReceiver;
     List<Msg_chat> msg_chatList;
     ChatAdpter chatAdpter;
     Group group=null;
@@ -80,7 +95,18 @@ public class SendMessage extends AppCompatActivity {
 
             }
         });
+        MyFunction.setChatName(group.getGroupName());
     }
+
+     class MsgBoradCastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            chatAdpter.add((Msg_chat) intent.getSerializableExtra("newMsg"));
+            chatAdpter.notifyDataSetChanged();
+        }
+    }
+
+
 
     @ViewById
     ImageView iv_back,iv_heagImage;
@@ -106,6 +132,8 @@ public class SendMessage extends AppCompatActivity {
 
     @Click(R.id.iv_back)
     void back(){
+        new SharedData(SendMessage.this).saveData(chatAdpter.getMsg_chats(),group.getGroupName());
+        MyFunction.setChatName(null);
         this.finish();
     }
 
@@ -117,14 +145,43 @@ public class SendMessage extends AppCompatActivity {
 
     @Click(R.id.iv_sound)
     //发送文字或语音
-    void send(){
+    void send() {
+        String text=et_text_send.getText().toString();
         if(change){
             String time=MyFunction.getTime(chatAdpter.getMsg_chats().get(chatAdpter.getCount()-1).getTime());
             if(time!=null){
                 chatAdpter.add(new Msg_chat(0,0,0,time,null,null,null,MyFunction.getTime()));
             }
-            chatAdpter.add(new Msg_chat(1,0,1,et_text_send.getText().toString(),null,null,"tyhj",MyFunction.getTime()));
+            chatAdpter.add(new Msg_chat(1,0,1,text,null,null,"tyhj",MyFunction.getTime()));
             et_text_send.setText("");
+            ChatManager chatmanager = MyFunction.getUser().getChatManager();
+
+            if(group.getIsgroup()==0) {
+                Chat newChat = chatmanager.createChat(group.getGroupName() + "@120.27.49.173", new MessageListener() {
+                    @Override
+                    public void processMessage(Chat chat, Message message) {
+                        Log.e("send", "成功接受" + message.getBody());
+                        chatAdpter.update();
+                    }
+                });
+                sendText(text,newChat);
+            }else {
+                try {
+                    MyFunction.getMultiUserChat().sendMessage(text+"0");
+                } catch (XMPPException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    }
+
+    @Background
+    public void sendText(String text, Chat newChat)  {
+        try {
+            newChat.sendMessage(text+"0");
+        } catch (XMPPException e) {
+            e.printStackTrace();
         }
     }
 
@@ -134,6 +191,13 @@ public class SendMessage extends AppCompatActivity {
         if(msg_chatList==null) {
             msg_chatList = new ArrayList<Msg_chat>();
             initMsg();
+        }
+        for(int i=msg_chatList.size()-1;i>=0;i--){
+            if(msg_chatList.get(i).getWho()==2&&msg_chatList.get(i).getStatus()!=2){
+                msg_chatList.get(i).setStatus(2);
+            }else {
+                break;
+            }
         }
         if(MyFunction.isIntenet(SendMessage.this)) {
             new SharedData(SendMessage.this).saveData(msg_chatList,group.getGroupName());
@@ -145,13 +209,19 @@ public class SendMessage extends AppCompatActivity {
         iv_heagImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
         Picasso.with(this).load(group.getGroupImageUrl()).into(iv_heagImage);
         lv_msg.setSelection(chatAdpter.getCount()-1);
+        //单人聊天的头像
+        chatAdpter.setHeadImage(group.getGroupImageUrl());
+        msgBoradCastReceiver=new MsgBoradCastReceiver();
+        intentFilter=new IntentFilter();
+        intentFilter.addAction("boradcast.action.GETMESSAGE");
+        registerReceiver(msgBoradCastReceiver,intentFilter);
     }
 
     private void initMsg() {
         Msg_chat msg_chat0=new Msg_chat(0,0,0,"昨天•22:45",null,null,null,10131210);
         Msg_chat msg_chat=new Msg_chat(1,0,0,"你好啊",null,null,"tyhj",10131210);
         Msg_chat msg_chat1=new Msg_chat(2,0,0,"你好,哈哈",null,getString(R.string.textUrl),"tyhj",10131210);
-        Msg_chat msg_chat2=new Msg_chat(1,1,0,"你好啊",getString(R.string.textUrl),null,"tyhj",10131210);
+        Msg_chat msg_chat2=new Msg_chat(1,1,1,"你好啊",getString(R.string.textUrl),null,"tyhj",10131210);
         Msg_chat msg_chat3=new Msg_chat(0,0,0,"12:05",null,null,null,10141210);
 
         Msg_chat msg_chat4=new Msg_chat(1,0,1,"你好啊",null,null,"tyhj",10141210);
@@ -171,10 +241,13 @@ public class SendMessage extends AppCompatActivity {
         msg_chatList.add(msg_chat8);
     }
 
+
     @Override
     public void onBackPressed() {
         new SharedData(SendMessage.this).saveData(chatAdpter.getMsg_chats(),group.getGroupName());
+        MyFunction.setChatName(null);
+        unregisterReceiver(msgBoradCastReceiver);
+
         super.onBackPressed();
     }
-
 }

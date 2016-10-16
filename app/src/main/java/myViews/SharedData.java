@@ -40,7 +40,6 @@ public class SharedData {
             SharedPreferences.Editor editor = shared.edit();
             editor.putString(name, oAuth_Base64);
             editor.commit();
-            Log.e("xxxxxxx","保存成功");
         } catch (Exception e) {  
             e.printStackTrace();  
         }  
@@ -50,7 +49,6 @@ public class SharedData {
         List<Msg_chat> chats = null;
         String productBase64 = shared.getString(name, null);
         if(productBase64==null) {
-            Log.e("xxxxxxx","失败");
             return null;
         }
         // 读取字节  

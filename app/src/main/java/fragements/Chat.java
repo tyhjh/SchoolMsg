@@ -1,6 +1,9 @@
 package fragements;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,14 +33,26 @@ import java.util.List;
 import adpter.GroupAdapter;
 import myinterface.ShowMenu;
 import publicinfo.Group;
+import publicinfo.Msg_chat;
 
 @EFragment(R.layout.fragment_chat)
 public class Chat extends Fragment {
+    MsgBoradCastReceiver msgBoradCastReceiver;
     int rotate=0;
+    IntentFilter intentFilter;
     ShowMenu showMenu;
     Animation noserch;
     List<Group> groups;
     GroupAdapter groupAdapter;
+
+
+    class MsgBoradCastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            groupAdapter.notifyDataSetChanged();
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,17 +116,23 @@ public class Chat extends Fragment {
     @AfterViews
     void afterViews(){
         groups=new ArrayList<Group>();
-        Group group=new Group(getString(R.string.textUrl),"4班讨论群","刚刚","哈哈哈哈",0,0,-1,3);
-        Group group1=new Group(getString(R.string.textUrl1),"Google Assistant","23:05","你好啊",1,1,1,1);
-        Group group2=new Group(getString(R.string.textUrl4),"Tyhj","23:05","你好啊",1,1,0,2);
+        Group group=new Group(getString(R.string.textUrl),"110",0);
+        Group group0=new Group(getString(R.string.textUrl),"120",0);
+        Group group1=new Group(getString(R.string.textUrl1),"Google Assistant",0);
+        Group group2=new Group(getString(R.string.textUrl4),"111",1);
         groups.add(group);
         groups.add(group1);
         groups.add(group2);
+        groups.add(group0);
         groupAdapter=new GroupAdapter(getActivity(),groups);
         rcly_qun.setAdapter(groupAdapter);
         LinearLayoutManager linearLayoutManager=new LinearLayoutManager(getActivity(),LinearLayoutManager.VERTICAL,false);
         rcly_qun.setLayoutManager(linearLayoutManager);
         rcly_qun.setItemAnimator(new DefaultItemAnimator());
+        intentFilter=new IntentFilter();
+        intentFilter.addAction("boradcast.action.GETMESSAGE2");
+        msgBoradCastReceiver=new MsgBoradCastReceiver();
+        getActivity().registerReceiver(msgBoradCastReceiver,intentFilter);
     }
 
     public void setShowMenu(ShowMenu showMenu){
@@ -124,5 +145,11 @@ public class Chat extends Fragment {
         if(groupAdapter!=null){
             groupAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        getActivity().unregisterReceiver(msgBoradCastReceiver);
+        super.onDestroy();
     }
 }

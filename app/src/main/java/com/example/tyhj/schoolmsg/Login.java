@@ -69,17 +69,17 @@ public class Login extends AppCompatActivity {
         String name,pas;
         name=etUserNumber.getText().toString();
         pas=etUserPassord.getText().toString();
-        starActivity();
-        //log(name,pas);
+        log(name,pas);
     }
 
     @Background
     void log(String name,String pas){
-        User user = new User(XmppConnection.getInstance().getConnection());
+        User user = new User(XmppConnection.getInstance());
         MyFunction.setUser(user);
         if(MyFunction.getUser().login(name, pas)){
             Toast("登陆成功");
             starActivity();
+            this.finish();
         }else {
             Snack("失败");
         }
