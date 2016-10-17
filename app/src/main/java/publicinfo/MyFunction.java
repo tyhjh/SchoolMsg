@@ -2,10 +2,16 @@ package publicinfo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Outline;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -21,6 +27,12 @@ import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +45,21 @@ import myViews.SharedData;
  */
 
 public class MyFunction {
+
+    private static int IMAGE_SIZE=300;
+
+    private static boolean isConnect;
+
+    private static UserInfo userInfo;
+
+    public static UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public static void setUserInfo(UserInfo userInfo) {
+        MyFunction.userInfo = userInfo;
+    }
+
     public static MultiUserChat multiUserChat;
 
     public static MultiUserChat getMultiUserChat() {
@@ -46,6 +73,26 @@ public class MyFunction {
     private static String chatName;
 
     private static User user;
+
+    private static List<Picture> pictureList;
+
+    public static List<Picture> getPictureList() {
+        return pictureList;
+    }
+
+    public static void setPictureList(List<Picture> pictureList) {
+        MyFunction.pictureList = pictureList;
+    }
+
+
+
+    public static boolean isConnect() {
+        return isConnect;
+    }
+
+    public static void setConnect(boolean connect) {
+        isConnect = connect;
+    }
 
     public static User getUser() {
         return user;
@@ -160,5 +207,75 @@ public class MyFunction {
     public static int getTime(){
         MyTime myTime=new MyTime();
         return Integer.parseInt(myTime.getMonth()+myTime.getDays()+myTime.getHour()+myTime.getMinute());
+    }
+    //从uri得到path
+    public static String getFilePathFromContentUri(Uri uri, ContentResolver contentResolver) {
+        String filePath;
+        String[] filePathColumn = {MediaStore.MediaColumns.DATA};
+        Cursor cursor = contentResolver.query(uri, filePathColumn, null, null, null);
+//      也可用下面的方法拿到cursor
+//      Cursor cursor = this.context.managedQuery(selectedVideoUri, filePathColumn, null, null, null);
+        cursor.moveToFirst();
+        int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+        filePath = cursor.getString(columnIndex);
+        cursor.close();
+        return filePath;
+    }
+    //图片压缩
+    public static void ImgCompress(String filePath,File newFile) {
+        int imageMg=100;
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+        //规定要压缩图片的分辨率
+        options.inSampleSize = calculateInSampleSize(options,720,1280);
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap= BitmapFactory.decodeFile(filePath, options);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, imageMg, baos);
+        //如果文件大于100KB就进行质量压缩，每次压缩比例增加百分之五
+        while (baos.toByteArray().length / 1024 > IMAGE_SIZE&&imageMg>50){
+            baos.reset();
+            imageMg-=5;
+            bitmap.compress(Bitmap.CompressFormat.JPEG, imageMg, baos);
+        }
+        //然后输出到指定的文件中
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(newFile);
+            fos.write(baos.toByteArray());
+            fos.flush();
+            fos.close();
+            baos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    //计算图片的缩放值
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+            final int heightRatio = Math.round((float) height/ (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
+        }
+        return inSampleSize;
+    }
+
+    //文件复制
+    public static void copyFile(File source, File dest) throws IOException {
+        FileChannel inputChannel = null;
+        FileChannel outputChannel = null;
+        try {
+            inputChannel = new FileInputStream(source).getChannel();
+            outputChannel = new FileOutputStream(dest).getChannel();
+            outputChannel.transferFrom(inputChannel, 0, inputChannel.size());
+        } finally {
+            inputChannel.close();
+            outputChannel.close();
+        }
     }
 }

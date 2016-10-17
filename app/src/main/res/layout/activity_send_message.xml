@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/ll_bg"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
+    android:id="@+id/ll_bg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <android.support.v7.widget.CardView
@@ -57,13 +56,12 @@
     </android.support.v7.widget.CardView>
 
     <ListView
-        android:divider="@null"
-        android:transcriptMode="normal"
         android:id="@+id/lv_msg"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1">
-    </ListView>
+        android:layout_weight="1"
+        android:divider="@null"
+        android:transcriptMode="normal"></ListView>
 
     <android.support.v7.widget.CardView
         android:id="@+id/cd_send"
@@ -124,5 +122,76 @@
 
         </LinearLayout>
     </android.support.v7.widget.CardView>
+
+    <LinearLayout
+        android:id="@+id/ll_add"
+        android:visibility="gone"
+        android:background="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:elevation="5dp"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rcly_picture"
+            android:layout_width="wrap_content"
+            android:layout_height="150dp">
+
+        </android.support.v7.widget.RecyclerView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:elevation="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:textColor="@color/blue"
+                android:id="@+id/btn_album"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:text="相册" />
+
+            <Button
+                android:textColor="@color/blue"
+                android:id="@+id/btn_camera"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:text="摄像头" />
+
+            <LinearLayout
+                android:gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.2">
+
+                <CheckBox
+                    android:textColor="@color/ichome"
+                    android:id="@+id/ckb_big"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:text="原图" />
+            </LinearLayout>
+
+            <Button
+                android:textColor="@color/ichome"
+                android:id="@+id/btn_send_picture"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:text="发送" />
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

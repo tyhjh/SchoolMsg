@@ -44,4 +44,5 @@ dependencies {
     compile files('libs/asmack.jar')
     compile files('libs/commons-codec-1.10.jar')
     compile files('libs/Ysd-first-2016.6.29.jar')
+    compile files('libs/universal-image-loader-1.9.5.jar')
 }

@@ -38,8 +38,7 @@
         <activity android:name=".ChanegPassword_" />
         <activity android:name=".Home_" />
         <activity
-            android:name=".SendMessage_"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
+            android:name=".SendMessage_"/>
 
         <service
             android:name="service.ChatService"

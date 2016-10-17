@@ -19,6 +19,9 @@ public class XmppConnection{
     private XMPPConnection connection = null;   
     private static XmppConnection xmppConnection = new XmppConnection();  
     private static Properties properties = new Properties();
+
+
+
     
     /**
      * ���췽��
@@ -64,7 +67,11 @@ public class XmppConnection{
      */  
     public boolean openConnection() {  
         try {  
-            if (null == connection || !connection.isAuthenticated()) {  
+            if (null == connection || !connection.isAuthenticated()) {
+                try {
+                    Class.forName("org.jivesoftware.smack.ReconnectionManager");
+                } catch (Exception e1) {
+                }
 //                XMPPConnection.DEBUG_ENABLED = false;// ����DEBUGģʽ 
                 XMPPConnection.DEBUG_ENABLED = false;// ����DEBUGģʽ
                 // ��������  

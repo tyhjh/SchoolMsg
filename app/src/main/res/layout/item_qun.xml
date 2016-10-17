@@ -58,8 +58,8 @@
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:id="@+id/iv_type"
-                android:layout_width="16dp"
-                android:layout_height="16dp" />
+                android:layout_width="13dp"
+                android:layout_height="13dp" />
             <TextView
                 android:id="@+id/tv_text"
                 android:textSize="13sp"

@@ -21,10 +21,12 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.apache.harmony.javax.security.auth.login.Configuration;
 
 import apis.connection.XmppConnection;
 import apis.userAndRoom.User;
 import publicinfo.MyFunction;
+import publicinfo.UserInfo;
 
 @EActivity(R.layout.activity_login)
 public class Login extends AppCompatActivity {
@@ -77,7 +79,7 @@ public class Login extends AppCompatActivity {
         User user = new User(XmppConnection.getInstance());
         MyFunction.setUser(user);
         if(MyFunction.getUser().login(name, pas)){
-            Toast("登陆成功");
+            MyFunction.setUserInfo(new UserInfo(name));
             starActivity();
             this.finish();
         }else {

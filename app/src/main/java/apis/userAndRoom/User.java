@@ -89,6 +89,7 @@ public class User {
         try {  
             if (connection1 == null)
                 return false;
+
             connection1.login(account, password);
             // �����ھQ��B  
             Presence presence = new Presence(Presence.Type.available);
