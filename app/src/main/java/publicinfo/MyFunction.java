@@ -2,6 +2,7 @@ package publicinfo;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -45,6 +46,18 @@ import myViews.SharedData;
  */
 
 public class MyFunction {
+
+    private  static boolean canServer;
+
+    public static boolean isCanServer() {
+        return canServer;
+    }
+
+    public static void setCanServer(boolean canServer) {
+        MyFunction.canServer = canServer;
+    }
+
+    private static boolean ifstart=true;
 
     private static int IMAGE_SIZE=300;
 
@@ -153,6 +166,18 @@ public class MyFunction {
             return true;
         }else {
             Toast.makeText(context, context.getString(R.string.nointernet),Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+
+    //是否有网络
+    public static boolean isIntenet(Context context,String str){
+        ConnectivityManager con=(ConnectivityManager)context.getSystemService(Activity.CONNECTIVITY_SERVICE);
+        boolean wifi=con.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
+        boolean internet=con.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();
+        if(wifi||internet){
+            return true;
+        }else {
             return false;
         }
     }
@@ -277,5 +302,21 @@ public class MyFunction {
             inputChannel.close();
             outputChannel.close();
         }
+    }
+//判断 服务 是否运行
+    public static boolean isServiceRun(Context mContext, String className) {
+        boolean isRun = false;
+        ActivityManager activityManager = (ActivityManager) mContext
+                .getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningServiceInfo> serviceList = activityManager
+                .getRunningServices(40);
+        int size = serviceList.size();
+        for (int i = 0; i < size; i++) {
+            if (serviceList.get(i).service.getClassName().equals(className) == true) {
+                isRun = true;
+                break;
+            }
+        }
+        return isRun;
     }
 }

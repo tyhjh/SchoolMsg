@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -17,6 +18,7 @@ import com.mxn.soul.flowingdrawer_core.LeftDrawerLayout;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
@@ -40,9 +42,24 @@ public class Home extends AppCompatActivity implements ShowMenu{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Intent intent=new Intent(this, ChatService.class);
-        startService(intent);
         MyFunction.setContext(this);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!MyFunction.isCanServer()&&MyFunction.isServiceRun(Home.this,"service.LogService")){
+                }
+                if(MyFunction.isServiceRun(Home.this,"service.LogService")){
+                    while (true){
+                        if(MyFunction.isIntenet(Home.this,null)){
+                            startService();
+                            break;
+                        }
+                    }
+                }
+                else
+                    return;
+            }
+        }).start();
     }
 
     @ViewById
@@ -142,6 +159,11 @@ public class Home extends AppCompatActivity implements ShowMenu{
         vpHome.setCurrentItem(3);
     }
 
+    @UiThread
+    public void startService() {
+        Intent intent=new Intent(this, ChatService.class);
+        startService(intent);
+    }
     void setInitColor(){
         btnHome1.setImageResource(R.drawable.ic_group_24dp);
         btnHome2.setImageResource(R.drawable.ic_tags);
@@ -175,13 +197,11 @@ public class Home extends AppCompatActivity implements ShowMenu{
                 Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
                 exitTime = System.currentTimeMillis();
             } else {
-                if(MyFunction.getUser()!=null)
-                    MyFunction.getUser().logout();
-                Intent intent=new Intent(this, ChatService.class);
-                stopService(intent);
                this.finish();
             }
         }
     }
+
+
 
 }

@@ -42,6 +42,7 @@ import org.jivesoftware.smackx.search.UserSearchManager;
 
 import apis.connection.XmppConnection;
 import apis.util.File2Bytes;
+import publicinfo.MyFunction;
 
 
 /**
@@ -75,6 +76,7 @@ public class User {
         if(connection!=null){
             connection.getInstance().closeConnection();
         }
+        MyFunction.setUser(null);
     }
     /** 
      * ��¼ 

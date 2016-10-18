@@ -1,7 +1,9 @@
 package com.example.tyhj.schoolmsg;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -27,6 +29,8 @@ import apis.connection.XmppConnection;
 import apis.userAndRoom.User;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
+import service.ChatService;
+import service.LogService;
 
 @EActivity(R.layout.activity_login)
 public class Login extends AppCompatActivity {
@@ -34,6 +38,18 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(MyFunction.isServiceRun(this,"service.ChatService")){
+            starActivity();
+            this.finish();
+        }else {
+            SharedPreferences shared=getSharedPreferences("login", Context.MODE_PRIVATE);
+            if(shared!=null&&shared.getString("name",null)!=null){
+                Intent intent=new Intent(this, LogService.class);
+                startService(intent);
+                starActivity();
+                this.finish();
+            }
+        }
     }
 
     @ViewById
@@ -66,6 +82,7 @@ public class Login extends AppCompatActivity {
     void setTvforgetpas(){
         startActivity(new Intent(Login.this,ChanegPassword_.class));
     }
+
     @Click(R.id.btLogin)
     void login(){
         String name,pas;
@@ -77,9 +94,18 @@ public class Login extends AppCompatActivity {
     @Background
     void log(String name,String pas){
         User user = new User(XmppConnection.getInstance());
+        user.logout();
+        user = new User(XmppConnection.getInstance());
         MyFunction.setUser(user);
         if(MyFunction.getUser().login(name, pas)){
             MyFunction.setUserInfo(new UserInfo(name));
+            SharedPreferences shared=getSharedPreferences("login", Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = shared.edit();
+            editor.putString("name",name);
+            editor.putString("pas",pas);
+            editor.commit();
+            Intent intent=new Intent(this, ChatService.class);
+            startService(intent);
             starActivity();
             this.finish();
         }else {

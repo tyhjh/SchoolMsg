@@ -2,6 +2,7 @@ package fragements;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import publicinfo.MyFunction;
+import service.ChatService;
 
 
 public class MyMenuFragment extends MenuFragment {
@@ -95,6 +97,12 @@ public class MyMenuFragment extends MenuFragment {
                     case R.id.menu_logout:
                         if(MyFunction.getUser()!=null)
                         MyFunction.getUser().logout();
+                        SharedPreferences shared=getActivity().getSharedPreferences("login", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = shared.edit();
+                        editor.clear();
+                        editor.commit();
+                        Intent intent=new Intent(getActivity(), ChatService.class);
+                        getActivity().stopService(intent);
                         startActivity(new Intent(getActivity(), Login_.class));
                         getActivity().finish();
                         break;

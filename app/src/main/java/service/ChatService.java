@@ -1,20 +1,31 @@
 package service;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.provider.MediaStore;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
+import android.widget.RemoteViews;
 
+import com.example.tyhj.schoolmsg.Application;
+import com.example.tyhj.schoolmsg.Home_;
+import com.example.tyhj.schoolmsg.R;
 import com.example.tyhj.schoolmsg.SendMessage;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.tyhj.myfist_2016_6_29.MyTime;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
@@ -40,9 +51,13 @@ import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
 
+import static android.content.ContentValues.TAG;
+
 public class ChatService extends Service {
 
     Vibrator vibrator;
+
+    Runnable runnable;
 
     private static Handler handler = new Handler();
 
@@ -64,20 +79,17 @@ public class ChatService extends Service {
         if(!file.exists())
             file.mkdirs();
 
+
         //创建默认的ImageLoader配置参数
         ImageLoaderConfiguration configuration = ImageLoaderConfiguration
                 .createDefault(getApplicationContext());
-
         //Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(configuration);
-
 
         getPhotos();
         MyFunction.setConnect(true);
         if (MyFunction.getUser().getXmppConnection().getConnection()!=null&&MyFunction.getUser().getXmppConnection().getConnection().isConnected()) {
-
             MyFunction.getUser().getXmppConnection().getConnection().addConnectionListener(connectionListener);
-
         }
 
 
@@ -108,37 +120,11 @@ public class ChatService extends Service {
         });
     }
 
-    public void sendBroadCast(Message message,String divi) {
-        int type=Integer.parseInt(message.getBody().substring(message.getBody().length()-1,message.getBody().length()));
-        String messageBody = message.getBody().substring(0,message.getBody().length()-1);
-        String messageFrom=message.getFrom().substring(0,message.getFrom().lastIndexOf(divi));
-
-        Msg_chat msg_chat=new Msg_chat(2,type,0,messageBody,null,null,messageFrom, MyFunction.getTime());
-        if(MyFunction.getChatName()!=null&&MyFunction.getChatName().equals(messageFrom)){
-            Intent intent=new Intent("boradcast.action.GETMESSAGE");
-            Bundle bundle=new Bundle();
-            bundle.putSerializable("newMsg",new Msg_chat(2,type,2,messageBody,null,null,messageFrom,MyFunction.getTime()));
-            intent.putExtras(bundle);
-            sendBroadcast(intent);
-            return;
-        }
-        System.out.println(msg_chat.getName()+" xxxx"+msg_chat.getText()+"xxxx"+msg_chat.getType());
-        List<Msg_chat> msg_chatList;
-        msg_chatList=new SharedData(MyFunction.getContext()).getData(messageFrom);
-        if(msg_chatList==null)
-            msg_chatList=new ArrayList<Msg_chat>();
-        msg_chatList.add(msg_chat);
-        new SharedData(MyFunction.getContext()).saveData(msg_chatList,messageFrom);
-        Intent intent=new Intent("boradcast.action.GETMESSAGE2");
-        vibrator = (Vibrator)getSystemService(getApplicationContext().VIBRATOR_SERVICE);
-        vibrator.vibrate(Long.parseLong("300"));
-        sendBroadcast(intent);
-    }
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        new Thread(runnable).start();
-        return super.onStartCommand(intent, flags, startId);
+        //new Thread(runnable).start();
+        return START_STICKY_COMPATIBILITY;
+        //return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
@@ -147,7 +133,6 @@ public class ChatService extends Service {
         handler.removeCallbacksAndMessages(null);
         handler = null;
     }
-
 
     public static ConnectionListener connectionListener = new ConnectionListener() {
 
@@ -182,65 +167,65 @@ public class ChatService extends Service {
         }
     };
 
+    private Runnable getRun(){
+        runnable = new Runnable() {
 
+            @Override
+            public void run() {
+                // 每一分钟发送一次包,确保连接
+                Presence presence = new Presence(Presence.Type.available);
+                if (MyFunction.isIntenet(getApplicationContext())) {
+                    MyFunction.getUser().getXmppConnection().getConnection().sendPacket(presence);
+                } else {
+                    Log.d("TestApp", "已经发送包确认");
 
-    private Runnable runnable = new Runnable() {
+                    // 以指定的时间间隔执行
+                    handler.postDelayed(this, 60 * 1000);
+                    if (MyFunction.getUser().getXmppConnection().getConnection().isAuthenticated() && MyFunction.getUser().getXmppConnection().getConnection().isSendPresence()) {
+                        Log.d("TestApp", "连接正常,发包正常!");
+                    }
+                    // 以指定的时间执行
+                    //handler.postAtTime(r, uptimeMillis);
+                    // 监听状态
+                    MyFunction.getUser().getXmppConnection().getConnection().addConnectionListener(new ConnectionListener() {
 
-        @Override
-        public void run() {
-            // 每一分钟发送一次包,确保连接
-            Presence presence = new Presence(Presence.Type.available);
-            if (MyFunction.isIntenet(getApplicationContext())) {
-                MyFunction.getUser().getXmppConnection().getConnection().sendPacket(presence);
-            } else {
-            Log.d("TestApp", "已经发送包确认");
+                        @Override
+                        public void reconnectionSuccessful() {
+                            // TODO Auto-generated method stub
+                            Log.d("TestApp", "重新登陆成功!");
+                        }
 
-            // 以指定的时间间隔执行
-            handler.postDelayed(this, 60 * 1000);
-            if (MyFunction.getUser().getXmppConnection().getConnection().isAuthenticated() && MyFunction.getUser().getXmppConnection().getConnection().isSendPresence()) {
-                Log.d("TestApp", "连接正常,发包正常!");
-            }
-            // 以指定的时间执行
-            //handler.postAtTime(r, uptimeMillis);
-            // 监听状态
-            MyFunction.getUser().getXmppConnection().getConnection().addConnectionListener(new ConnectionListener() {
+                        @Override
+                        public void reconnectionFailed(Exception arg0) {
+                            // TODO Auto-generated method stub
+                            Log.d("TestApp", "重新登陆失败!");
+                        }
 
-                @Override
-                public void reconnectionSuccessful() {
-                    // TODO Auto-generated method stub
-                    Log.d("TestApp", "重新登陆成功!");
-                }
+                        @Override
+                        public void reconnectingIn(int arg0) {
+                            // TODO Auto-generated method stub
+                        }
 
-                @Override
-                public void reconnectionFailed(Exception arg0) {
-                    // TODO Auto-generated method stub
-                    Log.d("TestApp", "重新登陆失败!");
-                }
+                        @Override
+                        public void connectionClosedOnError(Exception arg0) {
+                            // TODO Auto-generated method stub
+                            Log.d("TestApp", "连接已关闭!错误!");
+                        }
 
-                @Override
-                public void reconnectingIn(int arg0) {
-                    // TODO Auto-generated method stub
-                }
-
-                @Override
-                public void connectionClosedOnError(Exception arg0) {
-                    // TODO Auto-generated method stub
-                    Log.d("TestApp", "连接已关闭!错误!");
-                }
-
-                @Override
-                public void connectionClosed() {
-                    // TODO Auto-generated method stub
-                    Log.d("TestApp", "连接已关闭!");
+                        @Override
+                        public void connectionClosed() {
+                            // TODO Auto-generated method stub
+                            Log.d("TestApp", "连接已关闭!");
 				/*	// 重新发送包!设置在线
 					Presence presence = new Presence(Presence.Type.available);
 					xmppConnection.sendPacket(presence);*/
+                        }
+                    });
                 }
-            });
-        }
-        }
-    };
-
+            }
+        };
+        return runnable;
+    }
 
     private void getPhotos(){
         int count=50;
@@ -265,6 +250,78 @@ public class ChatService extends Service {
         }
         mCursor.close();
         MyFunction.setPictureList(pictures);
+    }
+
+    public void sendBroadCast(Message message,String divi) {
+        Application.setCount(Application.getCount()+1);
+        int type=Integer.parseInt(message.getBody().substring(message.getBody().length()-1,message.getBody().length()));
+        String messageBody = message.getBody().substring(0,message.getBody().length()-1);
+        String messageFrom=message.getFrom().substring(0,message.getFrom().lastIndexOf(divi));
+        Msg_chat msg_chat=new Msg_chat(2,type,0,messageBody,null,null,messageFrom, MyFunction.getTime());
+
+        if(!Application.getIsLeave()){
+            vibrator = (Vibrator)getSystemService(getApplicationContext().VIBRATOR_SERVICE);
+            vibrator.vibrate(Long.parseLong("300"));
+            notificationBar(msg_chat.getName(),msg_chat.getText(),Application.getCount());
+        }
+
+
+        if(MyFunction.getChatName()!=null&&MyFunction.getChatName().equals(messageFrom)){
+            Intent intent=new Intent("boradcast.action.GETMESSAGE");
+            Bundle bundle=new Bundle();
+            bundle.putSerializable("newMsg",new Msg_chat(2,type,2,messageBody,null,null,messageFrom,MyFunction.getTime()));
+            intent.putExtras(bundle);
+            sendBroadcast(intent);
+            return;
+        }
+        System.out.println(msg_chat.getName()+" xxxx"+msg_chat.getText()+"xxxx"+msg_chat.getType());
+        List<Msg_chat> msg_chatList;
+        msg_chatList=new SharedData(MyFunction.getContext()).getData(messageFrom);
+        if(msg_chatList==null)
+            msg_chatList=new ArrayList<Msg_chat>();
+        msg_chatList.add(msg_chat);
+        new SharedData(MyFunction.getContext()).saveData(msg_chatList,messageFrom);
+        Intent intent=new Intent("boradcast.action.GETMESSAGE2");
+        sendBroadcast(intent);
+    }
+
+    private void notificationBar(String name,String text,int count){
+        Bitmap bm = BitmapFactory.decodeResource(getResources(),R.drawable.ic_camera_24dp);
+        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
+
+        RemoteViews mRemoteViews = new RemoteViews(getPackageName(), R.layout.notify);
+        mRemoteViews.setImageViewResource(R.id.iv_headImage,R.mipmap.tyhj);
+        mRemoteViews.setTextViewText(R.id.from,"From："+name);
+        mRemoteViews.setTextViewText(R.id.text, text);
+        mRemoteViews.setTextViewText(R.id.time, new MyTime().getHour()+":"+new MyTime().getSecond());
+        mRemoteViews.setTextViewText(R.id.count, count+"");
+     /*   mBuilder.setContentTitle("From："+name)//设置通知栏标题
+                .setContentText(text) //设置通知栏显示内容
+                //.setContentIntent(getDefalutIntent(Notification.FLAG_AUTO_CANCEL)) //设置通知栏点击意图
+                .setNumber(count) //设置通知集合的数量
+                .setTicker("有新的消息") //通知首次出现在通知栏，带上升动画效果的
+                .setWhen(System.currentTimeMillis())//通知产生的时间，会在通知信息里显示，一般是系统获取到的时间
+                .setPriority(Notification.PRIORITY_DEFAULT) //设置该通知优先级
+                .setAutoCancel(true)//设置这个标志当用户单击面板就可以让通知将自动取消
+                .setOngoing(false)//ture，设置他为一个正在进行的通知。他们通常是用来表示一个后台任务,用户积极参与(如播放音乐)或以某种方式正在等待,因此占用设备(如一个文件下载,同步操作,主动网络连接)
+                .setDefaults(Notification.DEFAULT_VIBRATE)//向通知添加声音、闪灯和振动效果的最简单、最一致的方式是使用当前的用户默认设置，使用defaults属性，可以组合
+                //Notification.DEFAULT_ALL  Notification.DEFAULT_SOUND 添加声音 // requires VIBRATE permission
+                .setSmallIcon(R.drawable.ic_image);//设置通知小ICON*/
+        Intent intent = new Intent(getApplicationContext(),Home_.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, 0);
+        mBuilder.setContentIntent(pendingIntent);
+        mBuilder.setContent(mRemoteViews)
+                .setTicker("有新的消息")
+                .setPriority(Notification.DEFAULT_ALL)
+                .setAutoCancel(true)
+                .setOngoing(false)
+                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setLargeIcon(bm)
+                .setSmallIcon(R.drawable.ic_circle_24dp);
+        Notification notification = mBuilder.build();
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+        mNotificationManager.notify(1, notification);
     }
 
 }
