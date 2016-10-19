@@ -75,6 +75,12 @@ public class MyFunction {
         MyFunction.pictureList = pictureList;
     }
 
+    public static void initPictures(){
+        for(int i=0;i<pictureList.size();i++){
+            pictureList.get(i).setCheckable(0);
+        }
+    }
+
     public static boolean isReConnect() {
         return reConnect;
     }

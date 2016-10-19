@@ -182,6 +182,7 @@
             </LinearLayout>
 
             <Button
+                android:clickable="false"
                 android:textColor="@color/ichome"
                 android:id="@+id/btn_send_picture"
                 android:layout_width="0dp"

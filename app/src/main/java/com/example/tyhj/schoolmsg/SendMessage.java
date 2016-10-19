@@ -132,18 +132,46 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         });
         MyFunction.setChatName(group.getGroupName());
         imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+        MyFunction.initPictures();
     }
 
+    //获取选中图片
     @Override
     public void sendPicture(List<Picture> pictures) {
         if(pictures.size()>0){
-           btn_send_picture.setTextColor(Color.BLUE);
+           btn_send_picture.setTextColor(Color.parseColor("#2ca6cb"));
+            btn_send_picture.setClickable(true);
         }else {
             btn_send_picture.setTextColor(Color.GRAY);
+            btn_send_picture.setClickable(false);
         }
         sendPicture=pictures;
     }
 
+    //上传图片并发送
+    public boolean savaImageCloud(final String fileName, final String date) {
+        try {
+            if (!MyFunction.isIntenet(SendMessage.this))
+                return true;
+            AVObject avObject = new AVObject("Image");
+            final AVFile file = AVFile.withAbsoluteLocalPath("chat.JPEG", fileName);
+            avObject.put("image", file);
+            avObject.put("name", group.getGroupName()+ date);
+            avObject.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(AVException e) {
+                    if (e == null) {
+                        getImageUrl(fileName,date);
+                    } else {
+                        Toast.makeText(SendMessage.this, e.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
     class MsgBoradCastReceiver extends BroadcastReceiver {
         @Override
@@ -219,6 +247,38 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     @ViewById
     ListView lv_msg;
 
+    @Click(R.id.btn_send_picture)
+    void sendPhotos(){
+        if(sendPicture==null||sendPicture.size()<=0)
+            return;
+        ll_add.setVisibility(View.GONE);
+        iv_add.startAnimation(overadd);
+        et_text_send.setInputType(InputType.TYPE_CLASS_TEXT);
+        MyFunction.initPictures();
+        initRecycle();
+        pictureAdpter.notifyDataSetChanged();
+        for(int i=0;i<sendPicture.size();i++){
+            MyTime myTime = new MyTime();
+            String time=myTime.getYear() + myTime.getMonth_() + myTime.getDays() +
+                    myTime.getWeek_() + myTime.getHour() + myTime.getMinute() +
+                    myTime.getSecond() +i+ group.getGroupName() + ".JPEG";
+            if(isBigPicture){
+                try {
+                    //复制图片
+                    MyFunction.copyFile(new File(sendPicture.get(i).getPath()),new File(path,time));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                //压缩图片
+                MyFunction.ImgCompress(sendPicture.get(i).getPath(),new File(path,time));
+            }
+            final String fileName=path+"/"+time;
+            if (savaImageCloud(fileName,time)) return;
+        }
+        sendPicture.clear();
+    }
+
     @Click(R.id.iv_sound)
     //发送文字或语音
     void send() {
@@ -230,7 +290,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             Toast.makeText(SendMessage.this,"重新连接中",Toast.LENGTH_SHORT).show();
         }
     }
-
+    //发送消息的准备
     private void initSendMsg(String text,int type,String path) {
         String time;
         if(msg_chatList.size()>0)
@@ -254,7 +314,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             }
         }
     }
-
+    //相册
     @Click(R.id.btn_album)
     void album(){
         Intent intent = new Intent(ACTION_GET_CONTENT);
@@ -264,14 +324,14 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(intent, PICK_PHOTO);
     }
-
+    //相机
     @Click(R.id.btn_camera)
     void camera(){
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(intent, TAKE_PHOTO);
     }
-
+    //发送消息
     @Background
     public void sendText(String text, Chat newChat,int type)  {
         try {
@@ -286,6 +346,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         initListView();
         setListener();
         initRecycle();
+        btn_send_picture.setClickable(false);
     }
 
     //初始化消息列表
@@ -350,29 +411,6 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         rcly_picture.setLayoutManager(linearLayoutManager);
         rcly_picture.setItemAnimator(new DefaultItemAnimator());
         pictureAdpter.setInterface(this);
-    }
-
-    //初始化测试数据
-    private void initMsg() {
-        Msg_chat msg_chat0=new Msg_chat(0,0,0,"昨天•22:45",null,null,null,10131210);
-        Msg_chat msg_chat=new Msg_chat(1,0,0,"你好啊",null,null,"tyhj",10131210);
-        Msg_chat msg_chat1=new Msg_chat(2,0,0,"你好,哈哈",null,getString(R.string.textUrl),"tyhj",10131210);
-        Msg_chat msg_chat2=new Msg_chat(1,1,1,"你好啊",getString(R.string.textUrl),null,"tyhj",10131210);
-        Msg_chat msg_chat3=new Msg_chat(0,0,0,"12:05",null,null,null,10141210);
-
-        Msg_chat msg_chat4=new Msg_chat(1,0,1,"你好啊",null,null,"tyhj",10141210);
-        Msg_chat msg_chat5=new Msg_chat(2,0,0,"你好,哈哈",null,getString(R.string.textUrl1),"tyhj",10131210);
-        Msg_chat msg_chat6=new Msg_chat(1,1,1,"你好啊",getString(R.string.textUrl),null,"tyhj",10131210);
-        Msg_chat msg_chat8=new Msg_chat(1,1,1,"你好啊",getString(R.string.textUrl3),null,"tyhj",10131210);
-        msg_chatList.add(msg_chat0);
-        msg_chatList.add(msg_chat);
-        msg_chatList.add(msg_chat1);
-        msg_chatList.add(msg_chat2);
-        msg_chatList.add(msg_chat3);
-        msg_chatList.add(msg_chat4);
-        msg_chatList.add(msg_chat5);
-        msg_chatList.add(msg_chat6);
-        msg_chatList.add(msg_chat8);
     }
 
     //剪裁图片
@@ -473,7 +511,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
                             @Override
                             public void done(AVException e) {
                                 if (e == null) {
-                                    getImageUrl(fileName);
+                                    getImageUrl(fileName,date);
                                 } else {
                                     Toast.makeText(SendMessage.this, e.getMessage(),Toast.LENGTH_SHORT).show();
                                 }
@@ -490,17 +528,20 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     }
 
     //获取图片URl
-    public void getImageUrl(final String path) {
+    public void getImageUrl(final String path,String name) {
         AVQuery<AVObject> query = new AVQuery<>("Image");
-        query.whereEqualTo("name", group.getGroupName() + date);
+        query.whereEqualTo("name", group.getGroupName() + name);
         query.getFirstInBackground(new GetCallback<AVObject>() {
             @Override
             public void done(AVObject avObject, AVException e) {
                 // object 就是符合条件的第一个 AVObject
+                if(e!=null||avObject==null)
+                    return;
                 String chatImageUrl = avObject.getAVFile("image").getUrl();
                 if (chatImageUrl != null)
                     initSendMsg(chatImageUrl,1,path);
             }
+
         });
     }
 }
