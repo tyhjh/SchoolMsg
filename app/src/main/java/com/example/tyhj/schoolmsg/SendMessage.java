@@ -67,13 +67,14 @@ import publicinfo.Group;
 import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
+import publicinfo.UserInfo;
 
 import static android.content.Intent.ACTION_GET_CONTENT;
 
 @EActivity(R.layout.activity_send_message)
 public class SendMessage extends AppCompatActivity implements sendPicture {
     IntentFilter intentFilter;
-    ChatManager chatmanager = MyFunction.getUser().getChatManager();
+    ChatManager chatmanager;
     MsgBoradCastReceiver msgBoradCastReceiver;
     List<Msg_chat> msg_chatList;
     ChatAdpter chatAdpter;
@@ -221,25 +222,28 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     @Click(R.id.iv_sound)
     //发送文字或语音
     void send() {
-        if(MyFunction.isIntenet(SendMessage.this)&&MyFunction.isConnect()){
+        if(MyFunction.isIntenet(SendMessage.this)&&UserInfo.canDo()){
         String text=et_text_send.getText().toString();
         if(change)
             initSendMsg(text,0,text);
+        }else if(MyFunction.isIntenet(SendMessage.this)){
+            Toast.makeText(SendMessage.this,"重新连接中",Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void initSendMsg(String text,int type,String msg) {
+    private void initSendMsg(String text,int type,String path) {
         String time;
         if(msg_chatList.size()>0)
             time = MyFunction.getTime(chatAdpter.getMsg_chats().get(chatAdpter.getCount() - 1).getTime());
         else
         time="刚刚";
         if (time != null) {
-            chatAdpter.add(new Msg_chat(0, 0, -1, time, null, null, null, MyFunction.getTime()));
+            chatAdpter.add(new Msg_chat(0, 0, 0, time, null, null, null, MyFunction.getTime()));
         }
-        chatAdpter.add(new Msg_chat(1, type, 1, text, null, null, "tyhj", MyFunction.getTime()));
+        chatAdpter.add(new Msg_chat(1, type, -1, text, path, null, "tyhj", MyFunction.getTime()));
         et_text_send.setText("");
         if (group.getIsgroup() == 0) {
+                chatmanager=UserInfo.getXmppConnection().getChatManager();
             Chat newChat = chatmanager.createChat(group.getGroupName() + "@120.27.49.173",null);
             sendText(text, newChat,type);
         } else {
@@ -410,7 +414,6 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
                     if (data != null) {
                         imageUri = data.getData();
                     }
-
                     String path_pre = MyFunction.getFilePathFromContentUri(imageUri, contentResolver);
                     File newFile = new File(path, date);
                     if(isBigPicture){

@@ -19,9 +19,8 @@ import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
-import apis.connection.XmppConnection;
-import apis.userAndRoom.User;
 import publicinfo.MyFunction;
+import publicinfo.UserInfo;
 import service.ChatService;
 
 @EActivity(R.layout.activity_signup)
@@ -68,10 +67,10 @@ public class Signup extends AppCompatActivity {
     }
     @Background
     void regs(String name,String pas) {
-        User user = new User(XmppConnection.getInstance());
-        if(user.regist(name, pas).equals("1"))
+        if(UserInfo.Register(name,pas,Signup.this)) {
             Toast("注册成功");
-        else
+            this.finish();
+        } else
           Snack("失败");
     }
 

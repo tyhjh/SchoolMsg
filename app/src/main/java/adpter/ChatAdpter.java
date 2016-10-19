@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.R;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -64,7 +65,6 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                 }else if(msg_chat.getType()==1){
                     viewHolder.text.setVisibility(View.GONE);
                     imageLoader.displayImage(msg_chat.getText(), viewHolder.image, MyFunction.getOption());
-
                 }
                 if(msg_chat.getStatus()==-1){
                     Picasso.with(getContext()).load(R.drawable.ic_sent).into(viewHolder.status);
@@ -84,7 +84,7 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                     viewHolder.text.setText(msg_chat.getText());
                 }else if(msg_chat.getType()==1){
                     viewHolder.text.setVisibility(View.GONE);
-                    Picasso.with(getContext()).load(msg_chat.getText()).into(viewHolder.image);
+                    imageLoader.displayImage(msg_chat.getText(), viewHolder.image, MyFunction.getOption());
                 }
 
             } else if (msg_chat.getWho() == 0) {

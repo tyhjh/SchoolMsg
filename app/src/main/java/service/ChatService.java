@@ -41,6 +41,7 @@ import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.ReconnectionManager;
+import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
@@ -51,13 +52,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import apis.conf.SMKProperties;
-import apis.connection.XmppConnection;
-import apis.userAndRoom.ChatRoom;
+import api.ChatRoom;
 import myViews.SharedData;
 import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
+import publicinfo.UserInfo;
 
 import static android.content.ContentValues.TAG;
 
@@ -67,9 +67,9 @@ public class ChatService extends Service {
 
     Runnable runnable;
 
-    static XmppConnection xmppConnection;
+    public static XMPPConnection xmppConnection;
 
-    public static XmppConnection Getconnection(){
+    public static XMPPConnection getConnection(){
         return xmppConnection;
     }
 
@@ -86,6 +86,7 @@ public class ChatService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        xmppConnection=UserInfo.getXmppConnection();
         String path = Environment.getExternalStorageDirectory() + "/ASchollMsg";
         File file=new File(path);
         if(!file.exists())
@@ -99,13 +100,10 @@ public class ChatService extends Service {
         ImageLoader.getInstance().init(configuration);
 
         getPhotos();
-        MyFunction.setConnect(true);
-        if (MyFunction.getUser().getXmppConnection().getConnection()!=null&&MyFunction.getUser().getXmppConnection().getConnection().isConnected()) {
-            MyFunction.getUser().getXmppConnection().getConnection().addConnectionListener(connectionListener);
+        if (UserInfo.canDo()) {
+            xmppConnection.addConnectionListener(connectionListener);
         }
-
-
-            MyFunction.getUser().getChatManager().addChatListener(new ChatManagerListener() {
+            xmppConnection.getChatManager().addChatListener(new ChatManagerListener() {
             @Override
             public void chatCreated(Chat chat, boolean b) {
                 chat.addMessageListener(new MessageListener() {
@@ -117,8 +115,7 @@ public class ChatService extends Service {
             }
         });
 
-        final String string=MyFunction.getTime()+new MyTime().getSecond();
-        MultiUserChat multiUserChat = new ChatRoom(MyFunction.getUser().getXmppConnection().getConnection()).joinMultiUserChat(string,"111","111");
+        MultiUserChat multiUserChat = new ChatRoom(xmppConnection).joinMultiUserChat(UserInfo.getGroupName(),"111","111");
         MyFunction.setMultiUserChat(multiUserChat);
         multiUserChat.addMessageListener(new PacketListener() {
             @Override
@@ -126,7 +123,7 @@ public class ChatService extends Service {
                 Message message = (Message)packet;
                 //接收来自聊天室的聊天信息
                 System.out.println(message.getFrom()+":"+message.getBody());
-                if(!message.getFrom().equals("111@conference.120.27.49.173/"+string))
+                if(!message.getFrom().equals("111@conference.120.27.49.173/"+UserInfo.getGroupName()))
                 sendBroadCast(message,"@conference.120.27.49.173");
             }
         });
@@ -143,38 +140,32 @@ public class ChatService extends Service {
     public void onDestroy() {
         super.onDestroy();
         handler.removeCallbacksAndMessages(null);
-        handler = null;
     }
 
     public static ConnectionListener connectionListener = new ConnectionListener() {
 
         @Override
         public void reconnectionSuccessful() {
-            MyFunction.setConnect(true);
             Log.i("connection", "reconnectionSuccessful");
         }
 
         @Override
         public void reconnectionFailed(Exception arg0) {
             Log.i("connection", "reconnectionFailed");
-            MyFunction.setConnect(false);
         }
 
         @Override
         public void reconnectingIn(int arg0) {
-            MyFunction.setConnect(false);
             MyFunction.setReConnect(true);
             Log.i("connection", "reconnectingIn");
         }
 
         @Override
         public void connectionClosed() {
-            MyFunction.setConnect(false);
         }
 
         @Override
         public void connectionClosedOnError(Exception arg0) {
-            MyFunction.setConnect(false);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -202,19 +193,19 @@ public class ChatService extends Service {
                 // 每一分钟发送一次包,确保连接
                 Presence presence = new Presence(Presence.Type.available);
                 if (MyFunction.isIntenet(getApplicationContext())) {
-                    MyFunction.getUser().getXmppConnection().getConnection().sendPacket(presence);
+                    xmppConnection.sendPacket(presence);
                 } else {
                     Log.d("TestApp", "已经发送包确认");
 
                     // 以指定的时间间隔执行
                     handler.postDelayed(this, 60 * 1000);
-                    if (MyFunction.getUser().getXmppConnection().getConnection().isAuthenticated() && MyFunction.getUser().getXmppConnection().getConnection().isSendPresence()) {
+                    if (xmppConnection.isAuthenticated() && xmppConnection.isSendPresence()) {
                         Log.d("TestApp", "连接正常,发包正常!");
                     }
                     // 以指定的时间执行
                     //handler.postAtTime(r, uptimeMillis);
                     // 监听状态
-                    MyFunction.getUser().getXmppConnection().getConnection().addConnectionListener(new ConnectionListener() {
+                    xmppConnection.addConnectionListener(new ConnectionListener() {
 
                         @Override
                         public void reconnectionSuccessful() {
@@ -267,7 +258,7 @@ public class ChatService extends Service {
         while (mCursor.moveToNext()&&count>=0) {
             // 打印LOG查看照片ID的值
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
-            Log.e("MediaStore.Images.Media_ID=", path + "");
+            //Log.e("MediaStore.Images.Media_ID=", path + "");
             if(path.startsWith(sdcardPath + "/DCIM") || path.startsWith(sdcardPath + "/Pictures")
                     || path.startsWith(sdcardPath + "/tencent/QQfile_recv")|| path.startsWith(sdcardPath + "/tencent/QQ_Images")
                     || path.startsWith(sdcardPath + "/Download")) {
@@ -347,6 +338,7 @@ public class ChatService extends Service {
         public void handleMessage(android.os.Message msg) {
            switch (msg.what){
                case 1:
+                   if(!Application.getIsLeave())
                    Toast.makeText(Application.getContext(),Application.getContext().getString(R.string.nointernet),Toast.LENGTH_SHORT).show();
                    break;
                case 2:
@@ -357,15 +349,8 @@ public class ChatService extends Service {
                    dialog.setPositiveButton("确定", new DialogInterface.OnClickListener() {
                        @Override
                        public void onClick(DialogInterface dialog, int which) {
-                           if(MyFunction.getUser()!=null)
-                               MyFunction.getUser().logout();
-                           SharedPreferences shared=Application.getContext().getSharedPreferences("login", Context.MODE_PRIVATE);
-                           SharedPreferences.Editor editor = shared.edit();
-                           editor.clear();
-                           editor.commit();
-                           Intent intent=new Intent(Application.getContext(), ChatService.class);
-                           MyFunction.getContext().stopService(intent);
-                           intent=new Intent(Application.getContext(), Login_.class);
+                               UserInfo.logoutFore(Application.getContext());
+                           Intent intent=new Intent(Application.getContext(), Login_.class);
                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                            Application.getContext().startActivity(intent);
                            Application.getActivity().finish();

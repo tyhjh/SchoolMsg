@@ -16,6 +16,7 @@ import com.mxn.soul.flowingdrawer_core.FlowingView;
 import com.mxn.soul.flowingdrawer_core.LeftDrawerLayout;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
@@ -31,6 +32,7 @@ import fragements.Pager2;
 import myViews.MyViewPager;
 import myinterface.ShowMenu;
 import publicinfo.MyFunction;
+import publicinfo.UserInfo;
 import service.ChatService;
 
 @EActivity(R.layout.activity_home)
@@ -43,23 +45,20 @@ public class Home extends AppCompatActivity implements ShowMenu{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyFunction.setContext(this);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!MyFunction.isCanServer()&&MyFunction.isServiceRun(Home.this,"service.LogService")){
-                }
-                if(MyFunction.isServiceRun(Home.this,"service.LogService")){
-                    while (true){
-                        if(MyFunction.isIntenet()){
-                            startService();
-                            break;
-                        }
+        if(UserInfo.getXmppConnection()==null)
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (!MyFunction.isIntenet(Home.this,null)){
+
+                    }
+                    if(UserInfo.reLogin(Home.this)){
+                        Intent intent=new Intent(Home.this,ChatService.class);
+                        startService(intent);
                     }
                 }
-                else
-                    return;
-            }
-        }).start();
+            }).start();
+
     }
 
     @ViewById

@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import apis.userAndRoom.User;
-import myViews.SharedData;
 
 /**
  * Created by Tyhj on 2016/10/9.
@@ -49,35 +47,11 @@ import myViews.SharedData;
 
 public class MyFunction {
 
-    private  static boolean canServer;
-
-    public static boolean isCanServer() {
-        return canServer;
-    }
-
-    public static void setCanServer(boolean canServer) {
-        MyFunction.canServer = canServer;
-    }
-
-    private static boolean ifstart=true;
 
     private static int IMAGE_SIZE=300;
 
-    private static boolean lost;
-
     private static boolean reConnect;
 
-    private static boolean isConnect;
-
-    private static UserInfo userInfo;
-
-    public static UserInfo getUserInfo() {
-        return userInfo;
-    }
-
-    public static void setUserInfo(UserInfo userInfo) {
-        MyFunction.userInfo = userInfo;
-    }
 
     public static MultiUserChat multiUserChat;
 
@@ -90,8 +64,6 @@ public class MyFunction {
     }
 
     private static String chatName;
-
-    private static User user;
 
     private static List<Picture> pictureList;
 
@@ -111,25 +83,6 @@ public class MyFunction {
         MyFunction.reConnect = reConnect;
     }
 
-    public static void setIsConnect(boolean isConnect) {
-        MyFunction.isConnect = isConnect;
-    }
-
-    public static boolean isConnect() {
-        return isConnect;
-    }
-
-    public static void setConnect(boolean connect) {
-        isConnect = connect;
-    }
-
-    public static User getUser() {
-        return user;
-    }
-
-    public static void setUser(User user) {
-        MyFunction.user = user;
-    }
 
     private static Context context;
 
@@ -144,6 +97,7 @@ public class MyFunction {
     public static void setChatName(String chatName) {
         MyFunction.chatName = chatName;
     }
+
     public static void setContext(Context context) {
         MyFunction.context = context;
     }
@@ -199,7 +153,7 @@ public class MyFunction {
     }
 
     //是否有网络
-    public static boolean isIntenet(){
+    public static boolean isIntenet(Context context,String string){
         ConnectivityManager con=(ConnectivityManager)context.getSystemService(Activity.CONNECTIVITY_SERVICE);
         boolean wifi=con.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
         boolean internet=con.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();

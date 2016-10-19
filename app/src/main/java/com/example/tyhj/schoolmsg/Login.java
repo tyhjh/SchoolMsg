@@ -23,14 +23,9 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
-import org.apache.harmony.javax.security.auth.login.Configuration;
-
-import apis.connection.XmppConnection;
-import apis.userAndRoom.User;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 import service.ChatService;
-import service.LogService;
 
 @EActivity(R.layout.activity_login)
 public class Login extends AppCompatActivity {
@@ -38,17 +33,10 @@ public class Login extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(MyFunction.isServiceRun(this,"service.ChatService")){
+        SharedPreferences shared=getSharedPreferences("login", Context.MODE_PRIVATE);
+        if(shared!=null&&shared.getString("name",null)!=null){
             starActivity();
             this.finish();
-        }else {
-            SharedPreferences shared=getSharedPreferences("login", Context.MODE_PRIVATE);
-            if(shared!=null&&shared.getString("name",null)!=null){
-                Intent intent=new Intent(this, LogService.class);
-                startService(intent);
-                starActivity();
-                this.finish();
-            }
         }
     }
 
@@ -93,16 +81,7 @@ public class Login extends AppCompatActivity {
 
     @Background
     void log(String name,String pas){
-        User user = new User(XmppConnection.getInstance());
-        user.logout();
-        user = new User(XmppConnection.getInstance());
-        MyFunction.setUser(user);
-        if(MyFunction.getUser().login(name, pas)){
-            SharedPreferences shared=getSharedPreferences("login", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = shared.edit();
-            editor.putString("name",name);
-            editor.putString("pas",pas);
-            editor.commit();
+        if(UserInfo.Login(name,pas,Login.this)){
             Intent intent=new Intent(this, ChatService.class);
             startService(intent);
             starActivity();

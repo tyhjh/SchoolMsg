@@ -1,6 +1,4 @@
-package apis.userAndRoom;
-
-import android.util.Log;
+package api;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -143,7 +141,7 @@ public class ChatRoom {
             // �û�����������  
             muc.join(user, password, history,  
                     SmackConfiguration.getPacketReplyTimeout());  
-          Log.i("MultiUserChat", "�����ҡ�"+roomsName+"������ɹ�........");
+//            Log.i("MultiUserChat", "�����ҡ�"+roomsName+"������ɹ�........");  
             return muc;  
         } catch (XMPPException e) {  
             e.printStackTrace();  

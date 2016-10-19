@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 import publicinfo.MyFunction;
+import publicinfo.UserInfo;
 import service.ChatService;
 
 
@@ -95,14 +96,7 @@ public class MyMenuFragment extends MenuFragment {
                         break;
 
                     case R.id.menu_logout:
-                        if(MyFunction.getUser()!=null)
-                        MyFunction.getUser().logout();
-                        SharedPreferences shared=getActivity().getSharedPreferences("login", Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = shared.edit();
-                        editor.clear();
-                        editor.commit();
-                        Intent intent=new Intent(getActivity(), ChatService.class);
-                        getActivity().stopService(intent);
+                        UserInfo.logout(getActivity());
                         startActivity(new Intent(getActivity(), Login_.class));
                         getActivity().finish();
                         break;
