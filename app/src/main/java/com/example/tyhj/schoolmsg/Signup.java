@@ -22,6 +22,7 @@ import org.androidannotations.annotations.ViewById;
 import apis.connection.XmppConnection;
 import apis.userAndRoom.User;
 import publicinfo.MyFunction;
+import service.ChatService;
 
 @EActivity(R.layout.activity_signup)
 public class Signup extends AppCompatActivity {

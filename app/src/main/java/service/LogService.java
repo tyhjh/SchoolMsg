@@ -45,13 +45,17 @@ public class LogService extends Service {
             @Override
             public void run() {
                 User user = new User(XmppConnection.getInstance());
-                user.logout();
-                user = new User(XmppConnection.getInstance());
                 MyFunction.setUser(user);
-                if(MyFunction.getUser().login(name, pas))
+                if(MyFunction.getUser()!=null&&MyFunction.getUser().login(name, pas))
                     MyFunction.setCanServer(true);
-                else
-                    handler.sendEmptyMessage(1);
+                else {
+                    //handler.sendEmptyMessage(1);
+                    while (MyFunction.getUser()==null||!MyFunction.getUser().login(name, pas)){
+                        user = new User(XmppConnection.getInstance());
+                        MyFunction.setUser(user);
+                    }
+                    MyFunction.setCanServer(true);
+                }
             }
         }).start();
     }

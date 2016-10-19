@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.R;
 import com.example.tyhj.schoolmsg.SendMessage;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
 import com.tyhj.myfist_2016_6_29.MyTime;
 
 import org.jivesoftware.smack.Chat;
@@ -61,6 +63,10 @@ public class MyFunction {
 
     private static int IMAGE_SIZE=300;
 
+    private static boolean lost;
+
+    private static boolean reConnect;
+
     private static boolean isConnect;
 
     private static UserInfo userInfo;
@@ -97,7 +103,17 @@ public class MyFunction {
         MyFunction.pictureList = pictureList;
     }
 
+    public static boolean isReConnect() {
+        return reConnect;
+    }
 
+    public static void setReConnect(boolean reConnect) {
+        MyFunction.reConnect = reConnect;
+    }
+
+    public static void setIsConnect(boolean isConnect) {
+        MyFunction.isConnect = isConnect;
+    }
 
     public static boolean isConnect() {
         return isConnect;
@@ -130,6 +146,18 @@ public class MyFunction {
     }
     public static void setContext(Context context) {
         MyFunction.context = context;
+    }
+
+    //展示图片的设置
+    public static DisplayImageOptions getOption(){
+        return new DisplayImageOptions.Builder()
+                .showImageOnLoading(R.drawable.ic_image)
+                .showImageOnFail(R.mipmap.nomsg)
+                .cacheInMemory(true)
+                .cacheOnDisk(true)
+                .imageScaleType(ImageScaleType.IN_SAMPLE_INT)
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                .build();
     }
 
     //轮廓
@@ -171,7 +199,7 @@ public class MyFunction {
     }
 
     //是否有网络
-    public static boolean isIntenet(Context context,String str){
+    public static boolean isIntenet(){
         ConnectivityManager con=(ConnectivityManager)context.getSystemService(Activity.CONNECTIVITY_SERVICE);
         boolean wifi=con.getNetworkInfo(ConnectivityManager.TYPE_WIFI).isConnectedOrConnecting();
         boolean internet=con.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).isConnectedOrConnecting();

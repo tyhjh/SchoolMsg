@@ -66,7 +66,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         holder.iv_headImage.setClipToOutline(true);
         holder.iv_headImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
         List<Msg_chat> msgChatList=new SharedData(context).getData(group.getGroupName());
-        if(msgChatList!=null) {
+        if(msgChatList!=null&&msgChatList.size()>0) {
             msg_chat = msgChatList.get(msgChatList.size() - 1);
             holder.tv_send_time.setText(MyFunction.getTime2(msg_chat.getTime()));
             holder.tv_text.setText(msg_chat.getText());

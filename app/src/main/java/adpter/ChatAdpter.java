@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.tyhj.schoolmsg.R;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -27,9 +28,15 @@ import static android.content.ContentValues.TAG;
 public class ChatAdpter extends ArrayAdapter<Msg_chat> {
     String headImage;
     List<Msg_chat> msg_chats;
+    ImageLoader imageLoader;
     public ChatAdpter(Context context, int resource, List<Msg_chat> objects) {
         super(context, resource, objects);
         msg_chats=objects;
+        imageLoader= ImageLoader.getInstance();
+    }
+
+    public ImageLoader getImageLoader(){
+        return imageLoader;
     }
 
     public String getHeadImage() {
@@ -56,7 +63,8 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                     viewHolder.text.setText(msg_chat.getText());
                 }else if(msg_chat.getType()==1){
                     viewHolder.text.setVisibility(View.GONE);
-                    Picasso.with(getContext()).load(msg_chat.getImageUrl()).into(viewHolder.image);
+                    imageLoader.displayImage(msg_chat.getText(), viewHolder.image, MyFunction.getOption());
+
                 }
                 if(msg_chat.getStatus()==-1){
                     Picasso.with(getContext()).load(R.drawable.ic_sent).into(viewHolder.status);
@@ -76,7 +84,7 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                     viewHolder.text.setText(msg_chat.getText());
                 }else if(msg_chat.getType()==1){
                     viewHolder.text.setVisibility(View.GONE);
-                    Picasso.with(getContext()).load(msg_chat.getImageUrl()).into(viewHolder.image);
+                    Picasso.with(getContext()).load(msg_chat.getText()).into(viewHolder.image);
                 }
 
             } else if (msg_chat.getWho() == 0) {

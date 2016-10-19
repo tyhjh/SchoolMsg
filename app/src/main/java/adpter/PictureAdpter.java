@@ -22,6 +22,7 @@ import java.util.List;
 
 import myinterface.sendPicture;
 import publicinfo.Group;
+import publicinfo.MyFunction;
 import publicinfo.Picture;
 
 /**
@@ -35,7 +36,6 @@ public class PictureAdpter extends RecyclerView.Adapter<PictureAdpter.holder>{
     sendPicture sendPicture;
     private LayoutInflater mInflater;
     ImageLoader imageLoader;
-    DisplayImageOptions options;
     int count=0;
     List<Picture> list;
     public PictureAdpter(Context context, List<Picture> pictures){
@@ -44,13 +44,6 @@ public class PictureAdpter extends RecyclerView.Adapter<PictureAdpter.holder>{
         list=new ArrayList<Picture>();
         this.mInflater=LayoutInflater.from(context);
         imageLoader=ImageLoader.getInstance();
-        options = new DisplayImageOptions.Builder()
-                .showImageOnLoading(R.drawable.ic_image)
-                .showImageOnFail(R.mipmap.nomsg)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .bitmapConfig(Bitmap.Config.RGB_565)
-                .build();
     }
 
 
@@ -64,7 +57,7 @@ public class PictureAdpter extends RecyclerView.Adapter<PictureAdpter.holder>{
     @Override
     public void onBindViewHolder(final holder holder, final int position) {
         String imageUrl = ImageDownloader.Scheme.FILE.wrap(pictures.get(position).getPath());
-        imageLoader.displayImage(imageUrl, holder.imageView, options);
+        imageLoader.displayImage(imageUrl, holder.imageView, MyFunction.getOption());
 
         if(pictures.get(position).isCheckable()==1){
             holder.checkBox.setChecked(true);

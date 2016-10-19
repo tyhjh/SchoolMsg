@@ -98,7 +98,6 @@ public class Login extends AppCompatActivity {
         user = new User(XmppConnection.getInstance());
         MyFunction.setUser(user);
         if(MyFunction.getUser().login(name, pas)){
-            MyFunction.setUserInfo(new UserInfo(name));
             SharedPreferences shared=getSharedPreferences("login", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = shared.edit();
             editor.putString("name",name);

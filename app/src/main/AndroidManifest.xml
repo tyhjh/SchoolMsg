@@ -38,9 +38,14 @@
         </activity>
         <activity android:name=".Signup_" />
         <activity android:name=".ChanegPassword_" />
-        <activity android:name=".Home_" />
+        <activity android:name=".Home_"
+            android:launchMode="singleTask"
+            />
         <activity
-            android:name=".SendMessage_"/>
+            android:name=".SendMessage_"
+            android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden"
+            />
 
         <service
             android:name="service.ChatService"

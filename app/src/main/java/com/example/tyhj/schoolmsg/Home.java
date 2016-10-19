@@ -50,7 +50,7 @@ public class Home extends AppCompatActivity implements ShowMenu{
                 }
                 if(MyFunction.isServiceRun(Home.this,"service.LogService")){
                     while (true){
-                        if(MyFunction.isIntenet(Home.this,null)){
+                        if(MyFunction.isIntenet()){
                             startService();
                             break;
                         }
