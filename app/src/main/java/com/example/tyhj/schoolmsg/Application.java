@@ -3,11 +3,14 @@ package com.example.tyhj.schoolmsg;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.avos.avoscloud.AVOSCloud;
 
+import publicinfo.Group;
 import publicinfo.MyFunction;
+import service.ChatService;
 
 public class Application extends android.app.Application {
     private int activityCount;//activity的count数
@@ -15,6 +18,7 @@ public class Application extends android.app.Application {
     private static int count=0;
     private static Context context;
     private static Activity activity,activity2;
+    private static Group group;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -27,15 +31,14 @@ public class Application extends android.app.Application {
 
             }
 
-
-
-
             @Override
             public void onActivityStarted(Activity activity) {
                 activityCount++;
                 Application.activity2=activity;
                 Application.activity=activity;
                 isForeground = true;
+                if(ChatService.getNotifiManager()!=null)
+                ChatService.getNotifiManager().cancelAll();
                 count=0;
             }
 
@@ -85,5 +88,13 @@ public class Application extends android.app.Application {
 
     public static Activity getActivity() {
         return activity;
+    }
+
+    public static Group getGroup() {
+        return group;
+    }
+
+    public static void setGroup(Group group) {
+        Application.group = group;
     }
 }

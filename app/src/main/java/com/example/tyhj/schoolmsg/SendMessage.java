@@ -49,9 +49,7 @@ import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
-import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Message;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,6 +58,7 @@ import java.util.List;
 
 import adpter.ChatAdpter;
 import adpter.PictureAdpter;
+import api.FormatTools;
 import myViews.SharedData;
 import myViews.StatusBarUtil;
 import myinterface.sendPicture;
@@ -68,6 +67,7 @@ import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
 import publicinfo.UserInfo;
+import service.ChatService;
 
 import static android.content.Intent.ACTION_GET_CONTENT;
 
@@ -148,31 +148,6 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         sendPicture=pictures;
     }
 
-    //上传图片并发送
-    public boolean savaImageCloud(final String fileName, final String date) {
-        try {
-            if (!MyFunction.isIntenet(SendMessage.this))
-                return true;
-            AVObject avObject = new AVObject("Image");
-            final AVFile file = AVFile.withAbsoluteLocalPath("chat.JPEG", fileName);
-            avObject.put("image", file);
-            avObject.put("name", group.getGroupName()+ date);
-            avObject.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(AVException e) {
-                    if (e == null) {
-                        getImageUrl(fileName,date);
-                    } else {
-                        Toast.makeText(SendMessage.this, e.getMessage(),Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     class MsgBoradCastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -236,8 +211,9 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
 
     @Click(R.id.iv_back)
     void back(){
-        new SharedData(SendMessage.this).saveData(chatAdpter.getMsg_chats(),group.getGroupName());
+        ChatService.savaDate(chatAdpter.getMsg_chats(),group.getGroupName());
         MyFunction.setChatName(null);
+        unregisterReceiver(msgBoradCastReceiver);
         this.finish();
     }
 
@@ -274,7 +250,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
                 MyFunction.ImgCompress(sendPicture.get(i).getPath(),new File(path,time));
             }
             final String fileName=path+"/"+time;
-            if (savaImageCloud(fileName,time)) return;
+            if (savaImageCloud(fileName,time,sendPicture.get(i).getPath())) return;
         }
         sendPicture.clear();
     }
@@ -290,8 +266,8 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             Toast.makeText(SendMessage.this,"重新连接中",Toast.LENGTH_SHORT).show();
         }
     }
-    //发送消息的准备
-    private void initSendMsg(String text,int type,String path) {
+    //显示发送的消息
+    private void initSendMsg(String Url,int type,String path) {
         String time;
         if(msg_chatList.size()>0)
             time = MyFunction.getTime(chatAdpter.getMsg_chats().get(chatAdpter.getCount() - 1).getTime());
@@ -300,15 +276,15 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         if (time != null) {
             chatAdpter.add(new Msg_chat(0, 0, 0, time, null, null, null, MyFunction.getTime()));
         }
-        chatAdpter.add(new Msg_chat(1, type, -1, text, path, null, "tyhj", MyFunction.getTime()));
+        chatAdpter.add(new Msg_chat(1, type, -1, Url, path, null, "tyhj", MyFunction.getTime()));
         et_text_send.setText("");
         if (group.getIsgroup() == 0) {
                 chatmanager=UserInfo.getXmppConnection().getChatManager();
             Chat newChat = chatmanager.createChat(group.getGroupName() + "@120.27.49.173",null);
-            sendText(text, newChat,type);
+            sendText(Url, newChat,type);
         } else {
             try {
-                MyFunction.getMultiUserChat().sendMessage(text + "0");
+                MyFunction.getMultiUserChat().sendMessage(Url + type);
             } catch (XMPPException e) {
                 e.printStackTrace();
             }
@@ -354,7 +330,6 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         msg_chatList=new SharedData(SendMessage.this).getData(group.getGroupName());
         if(msg_chatList==null) {
             msg_chatList = new ArrayList<Msg_chat>();
-           // initMsg();
         }
         setMsgStatus();
         chatAdpter=new ChatAdpter(SendMessage.this,0,msg_chatList);
@@ -362,10 +337,13 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         tv_name.setText(group.getGroupName());
         iv_heagImage.setClipToOutline(true);
         iv_heagImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
-        Picasso.with(this).load(group.getGroupImageUrl()).into(iv_heagImage);
+        if(group.getDrawable()==null)
+            Picasso.with(this).load(R.mipmap.default_headimage).into(iv_heagImage);
+        else
+            iv_heagImage.setImageDrawable(FormatTools.getInstance().Bytes2Drawable(group.getDrawable()));
         lv_msg.setSelection(chatAdpter.getCount()-1);
         //单人聊天的头像
-        chatAdpter.setHeadImage(group.getGroupImageUrl());
+        chatAdpter.setHeadImage(FormatTools.getInstance().Bytes2Drawable(group.getDrawable()));
         lv_msg.setOnScrollListener(new PauseOnScrollListener(chatAdpter.getImageLoader(),true,true));
     }
 
@@ -420,6 +398,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         startActivityForResult(intent, CROP_PHOTO);
     }
+
     //随机获取文件名字
     public void getDate() {
         MyTime myTime = new MyTime();
@@ -436,7 +415,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             return;
         }
 
-        new SharedData(SendMessage.this).saveData(chatAdpter.getMsg_chats(),group.getGroupName());
+        ChatService.savaDate(chatAdpter.getMsg_chats(),group.getGroupName());
         MyFunction.setChatName(null);
         unregisterReceiver(msgBoradCastReceiver);
         super.onBackPressed();
@@ -544,4 +523,32 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
 
         });
     }
+    //上传图片并发送
+    public boolean savaImageCloud(final String fileName, final String name, final String PrelandPath) {
+        try {
+            if (!MyFunction.isIntenet(SendMessage.this))
+                return true;
+            AVObject avObject = new AVObject("Image");
+            final AVFile file = AVFile.withAbsoluteLocalPath("chat.JPEG", fileName);
+            avObject.put("image", file);
+            avObject.put("name", group.getGroupName()+ name);
+            avObject.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(AVException e) {
+                    if (e == null) {
+                        File file1=new File(fileName);
+                        if(file1.exists())
+                            file1.delete();
+                        getImageUrl(PrelandPath,name);
+                    } else {
+                        Toast.makeText(SendMessage.this, e.getMessage(),Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

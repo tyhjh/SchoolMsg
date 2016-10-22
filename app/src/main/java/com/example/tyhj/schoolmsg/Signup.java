@@ -1,5 +1,7 @@
 package com.example.tyhj.schoolmsg;
 
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +21,7 @@ import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
+import api.FormatTools;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 import service.ChatService;
@@ -69,6 +72,12 @@ public class Signup extends AppCompatActivity {
     void regs(String name,String pas) {
         if(UserInfo.Register(name,pas,Signup.this)) {
             Toast("注册成功");
+            if(!etRegisterName.getText().toString().trim().equals(""))
+                MyFunction.setRegisterName(etRegisterName.getText().toString().trim());
+            else
+                MyFunction.setRegisterName(name);
+            MyFunction.setRegister(true);
+            MyFunction.setRegisterId(name);
             this.finish();
         } else
           Snack("失败");

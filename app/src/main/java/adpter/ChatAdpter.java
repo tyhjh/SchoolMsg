@@ -1,6 +1,7 @@
 package adpter;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,7 +28,7 @@ import static android.content.ContentValues.TAG;
  */
 
 public class ChatAdpter extends ArrayAdapter<Msg_chat> {
-    String headImage;
+    Drawable headImage;
     List<Msg_chat> msg_chats;
     ImageLoader imageLoader;
     public ChatAdpter(Context context, int resource, List<Msg_chat> objects) {
@@ -40,11 +41,11 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
         return imageLoader;
     }
 
-    public String getHeadImage() {
+    public Drawable getHeadImage() {
         return headImage;
     }
 
-    public void setHeadImage(String headImage) {
+    public void setHeadImage(Drawable headImage) {
         this.headImage = headImage;
     }
 
@@ -79,7 +80,7 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                 viewHolder.headImage= (ImageView) view.findViewById(R.id.iv_yourheadImage);
                 viewHolder.headImage.setClipToOutline(true);
                 viewHolder.headImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
-                Picasso.with(getContext()).load(getHeadImage()).into(viewHolder.headImage);
+                viewHolder.headImage.setImageDrawable(getHeadImage());
                 if(msg_chat.getType()==0){
                     viewHolder.text.setText(msg_chat.getText());
                 }else if(msg_chat.getType()==1){

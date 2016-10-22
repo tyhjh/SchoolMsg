@@ -47,6 +47,19 @@ import java.util.regex.Pattern;
 
 public class MyFunction {
 
+    private static boolean register;
+
+    private static String registerName;
+
+    private static String registerId;
+
+    public static String getRegisterId() {
+        return registerId;
+    }
+
+    public static void setRegisterId(String registerId) {
+        MyFunction.registerId = registerId;
+    }
 
     private static int IMAGE_SIZE=300;
 
@@ -106,6 +119,22 @@ public class MyFunction {
 
     public static void setContext(Context context) {
         MyFunction.context = context;
+    }
+
+    public static boolean isRegister() {
+        return register;
+    }
+
+    public static void setRegister(boolean register) {
+        MyFunction.register = register;
+    }
+
+    public static String getRegisterName() {
+        return registerName;
+    }
+
+    public static void setRegisterName(String registerName) {
+        MyFunction.registerName = registerName;
     }
 
     //展示图片的设置
@@ -307,4 +336,31 @@ public class MyFunction {
         }
         return isRun;
     }
+
+    public static int[] calculatePopWindowPos(final View anchorView, final View contentView) {
+        final int windowPos[] = new int[2];
+        final int anchorLoc[] = new int[2];
+        // 获取锚点View在屏幕上的左上角坐标位置
+        anchorView.getLocationOnScreen(anchorLoc);
+        final int anchorHeight = anchorView.getHeight();
+        // 获取屏幕的高宽
+        final int screenHeight = ScreenUtils.getScreenHeight(anchorView.getContext());
+        final int screenWidth = ScreenUtils.getScreenWidth(anchorView.getContext());
+        contentView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
+        // 计算contentView的高宽
+        final int windowHeight = contentView.getMeasuredHeight();
+        final int windowWidth = contentView.getMeasuredWidth();
+        // 判断需要向上弹出还是向下弹出显示
+        final boolean isNeedShowUp = (screenHeight - anchorLoc[1] - anchorHeight < windowHeight);
+        if (isNeedShowUp) {
+            windowPos[0] = screenWidth - windowWidth;
+            windowPos[1] = anchorLoc[1] - windowHeight;
+        } else {
+            windowPos[0] = screenWidth - windowWidth;
+            windowPos[1] = anchorLoc[1] + anchorHeight;
+        }
+        return windowPos;
+    }
+
+
 }

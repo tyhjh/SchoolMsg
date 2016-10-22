@@ -2,11 +2,13 @@ package fragements;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,20 +26,29 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVFile;
+import com.avos.avoscloud.AVObject;
+import com.avos.avoscloud.SaveCallback;
 import com.example.tyhj.schoolmsg.Login;
 import com.example.tyhj.schoolmsg.Login_;
 import com.example.tyhj.schoolmsg.R;
+import com.example.tyhj.schoolmsg.SendMessage;
 import com.mxn.soul.flowingdrawer_core.MenuFragment;
 import com.squareup.picasso.Picasso;
+import com.tyhj.myfist_2016_6_29.MyTime;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 
+import api.FormatTools;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 import service.ChatService;
+
+import static android.content.Intent.ACTION_GET_CONTENT;
 
 
 public class MyMenuFragment extends MenuFragment {
@@ -47,6 +58,7 @@ public class MyMenuFragment extends MenuFragment {
     Button camoral, images;
     Uri imageUri;
     ImageView imageView;
+    Drawable drawable;
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,12 +68,12 @@ public class MyMenuFragment extends MenuFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_menu, container, false);
         navigationView= (NavigationView) view.findViewById(R.id.vNavigation);
-
+        contentResolver=getActivity().getContentResolver();
         TextView textView= (TextView) view.findViewById(R.id.signature);
         imageView=(ImageView) view.findViewById(R.id.userheadImage);
         imageView.setOutlineProvider(MyFunction.getOutline(true,20,0));
         imageView.setClipToOutline(true);
-        Picasso.with(getActivity()).load(R.mipmap.default_headimage).into(imageView);
+
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,7 +106,6 @@ public class MyMenuFragment extends MenuFragment {
                     case R.id.menu_share:
                       Toast.makeText(getActivity(),getString(R.string.share), Toast.LENGTH_SHORT).show();
                         break;
-
                     case R.id.menu_logout:
                         UserInfo.logout(getActivity());
                         startActivity(new Intent(getActivity(), Login_.class));
@@ -107,8 +118,31 @@ public class MyMenuFragment extends MenuFragment {
                 return false;
             }
         });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!UserInfo.canDo()){
+
+                }
+                drawable=FormatTools.getInstance().Bytes2Drawable(UserInfo.getUserImage(UserInfo.getId()));
+                handler.sendEmptyMessage(1);
+            }
+        }).start();
     }
-    // 上传用户头像
+    public void onOpenMenu(){
+
+    }
+    public void onCloseMenu(){
+    }
+
+    String path = Environment.getExternalStorageDirectory() + "/ASchollMsg";
+    public static final int TAKE_PHOTO = 1;
+    public static final int CROP_PHOTO = 2;
+    public static final int PICK_PHOTO=0;
+    String date;
+    ContentResolver contentResolver;
+
+    //选择图片
     private void dialog() {
         AlertDialog.Builder di;
         di = new AlertDialog.Builder(getActivity());
@@ -116,7 +150,7 @@ public class MyMenuFragment extends MenuFragment {
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         View layout = inflater.inflate(R.layout.headchoose, null);
         di.setView(layout);
-        final Dialog dialog=di.show();
+        final Dialog dialog = di.show();
         camoral = (Button) layout.findViewById(R.id.camoral);
         images = (Button) layout.findViewById(R.id.images);
         // 相机
@@ -124,74 +158,93 @@ public class MyMenuFragment extends MenuFragment {
             @Override
             public void onClick(View v) {
                 dialog.cancel();
-                File f1 = new File(Environment.getExternalStorageDirectory()+"/LinkManPhone");
-                if(!f1.exists()){
-                    f1.mkdirs();
-                }
-                File outputImage = new File(Environment
-                        .getExternalStorageDirectory()+"/LinkManPhone", "head.jpg");
-                try {
-                    if (outputImage.exists()) {
-                        outputImage.delete();
-                    }
-                    outputImage.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                imageUri = Uri.fromFile(outputImage);
-
-                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                WHERE_PHOTO = 1;
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 startActivityForResult(intent, TAKE_PHOTO);
             }
         });
         // 相册
         images.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
                 dialog.cancel();
-                File f1 = new File(Environment.getExternalStorageDirectory()+"/LinkManPhone");
-                if(!f1.exists()){
-                    f1.mkdirs();
-                }
-                File outputImage = new File(Environment
-                        .getExternalStorageDirectory()+"/LinkManPhone", "head.jpg");
-                try {
-                    if (outputImage.exists()) {
-                        outputImage.delete();
-                    }
-                    outputImage.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                imageUri = Uri.fromFile(outputImage);
-
-                WHERE_PHOTO = 2;
-                Intent intent = new Intent("android.intent.action.GET_CONTENT");
+                Intent intent = new Intent(ACTION_GET_CONTENT);
                 intent.setType("image/*");
                 intent.putExtra("crop", true);
                 intent.putExtra("scale", true);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, PICK_PHOTO);
             }
         });
     }
-    public static final int TAKE_PHOTO = 1;
-    public static final int CROP_PHOTO = 2;
-    int WHERE_PHOTO = 0;
-    String date;
-    public void onOpenMenu(){
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            //这是从相机返回的数据
+            case TAKE_PHOTO:
+                getDate();
+                if (resultCode == getActivity().RESULT_OK) {
+                    if (data != null) {
+                        imageUri = data.getData();
+                    }
+                    String path_pre = MyFunction.getFilePathFromContentUri(imageUri, contentResolver);
+                    File newFile = new File(path, date);
+                        //压缩图片
+                    MyFunction.ImgCompress(path_pre, newFile);
+                    cropPhoto(Uri.fromFile(newFile));
+                }
+                break;
+            //这是从相册返回的数据
+            case PICK_PHOTO:
+                getDate();
+                if (resultCode == getActivity().RESULT_OK) {
+                    if (data != null) {
+                        imageUri = data.getData();
+                    }
+                    String path_pre = MyFunction.getFilePathFromContentUri(imageUri, contentResolver);
+                    File newFile = new File(path, date);
+                        //压缩图片
+                        MyFunction.ImgCompress(path_pre, newFile);
+                        cropPhoto(Uri.fromFile(newFile));
+                }
+                break;
+            //剪裁图片返回数据,就是原来的文件
+            case CROP_PHOTO:
+                if (resultCode == getActivity().RESULT_OK) {
+                    final String fileName = path + "/" + date;
+                    File newFile = new File(path, date);
+                    MyFunction.ImgCompress(fileName, newFile);
+                    //获取到的就是new File或fileName
+                    UserInfo.changeImage(new File(path, date));
+                }
+                break;
+            default:
+                break;
+        }
     }
-    public void onCloseMenu(){
+
+    //随机获取文件名字
+    public void getDate() {
+        MyTime myTime = new MyTime();
+        date = myTime.getYear() + myTime.getMonth_() + myTime.getDays() +
+                myTime.getWeek_() + myTime.getHour() + myTime.getMinute() +
+                myTime.getSecond() + UserInfo.getId()+ ".JPEG";
     }
+
+    //剪裁图片
+    public void cropPhoto(Uri imageUri) {
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(imageUri, "image/*");
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intent, CROP_PHOTO);
+    }
+
     Handler handler=new Handler(){
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what){
-                case 1:
+                case 1:imageView.setImageDrawable(drawable);
                     break;
                 case 2:
                     break;

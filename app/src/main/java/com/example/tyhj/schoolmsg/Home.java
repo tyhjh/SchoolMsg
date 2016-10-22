@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -19,10 +20,12 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.LongClick;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 
+import api.FormatTools;
 import fragements.Chat;
 import fragements.Chat_;
 import fragements.Msg;
@@ -58,7 +61,14 @@ public class Home extends AppCompatActivity implements ShowMenu{
                     }
                 }
             }).start();
-
+        if(MyFunction.isRegister()&&UserInfo.getId().equals(MyFunction.getRegisterId())){
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    UserInfo.changeImage( FormatTools.getInstance().Drawable2Bytes(getDrawable(R.mipmap.tyhj)));
+                }
+            }).start();
+        }
     }
 
     @ViewById

@@ -41,8 +41,10 @@ import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.ReconnectionManager;
+import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
@@ -54,11 +56,13 @@ import java.util.List;
 
 import api.ChatRoom;
 import myViews.SharedData;
+import publicinfo.Group;
 import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
 import publicinfo.UserInfo;
 
+import static android.app.PendingIntent.FLAG_NO_CREATE;
 import static android.content.ContentValues.TAG;
 
 public class ChatService extends Service {
@@ -66,6 +70,8 @@ public class ChatService extends Service {
     Vibrator vibrator;
 
     Runnable runnable;
+
+    static NotificationManager mNotificationManager;
 
     public static XMPPConnection xmppConnection;
 
@@ -75,7 +81,6 @@ public class ChatService extends Service {
 
     public ChatService() {
     }
-
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -92,17 +97,20 @@ public class ChatService extends Service {
         if(!file.exists())
             file.mkdirs();
 
-
         //创建默认的ImageLoader配置参数
         ImageLoaderConfiguration configuration = ImageLoaderConfiguration
                 .createDefault(getApplicationContext());
         //Initialize ImageLoader with configuration.
         ImageLoader.getInstance().init(configuration);
-
+        //获取最近图片
         getPhotos();
         if (UserInfo.canDo()) {
             xmppConnection.addConnectionListener(connectionListener);
         }
+
+        //设置好友申请监听
+        addSubscriptionListener();
+
             xmppConnection.getChatManager().addChatListener(new ChatManagerListener() {
             @Override
             public void chatCreated(Chat chat, boolean b) {
@@ -131,7 +139,8 @@ public class ChatService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //new Thread(runnable).start();
+        getRun();
+        new Thread(runnable).start();
         return START_STICKY_COMPATIBILITY;
         //return super.onStartCommand(intent, flags, startId);
     }
@@ -192,7 +201,7 @@ public class ChatService extends Service {
             public void run() {
                 // 每一分钟发送一次包,确保连接
                 Presence presence = new Presence(Presence.Type.available);
-                if (MyFunction.isIntenet(getApplicationContext())) {
+                if (MyFunction.isIntenet(getApplicationContext(),null)) {
                     xmppConnection.sendPacket(presence);
                 } else {
                     Log.d("TestApp", "已经发送包确认");
@@ -290,7 +299,6 @@ public class ChatService extends Service {
             bundle.putSerializable("newMsg",new Msg_chat(2,type,2,messageBody,null,null,messageFrom,MyFunction.getTime()));
             intent.putExtras(bundle);
             sendBroadcast(intent);
-            return;
         }
 
 
@@ -302,14 +310,14 @@ public class ChatService extends Service {
         msg_chatList.add(msg_chat);
         new SharedData(MyFunction.getContext()).saveData(msg_chatList,messageFrom);
         Intent intent=new Intent("boradcast.action.GETMESSAGE2");
+        intent.putExtra("msgFrom",messageFrom);
         sendBroadcast(intent);
     }
 
     private void notificationBar(String name,String text,int count){
         Bitmap bm = BitmapFactory.decodeResource(getResources(),R.drawable.ic_camera_24dp);
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this);
-
         RemoteViews mRemoteViews = new RemoteViews(getPackageName(), R.layout.notify);
         mRemoteViews.setImageViewResource(R.id.iv_headImage,R.mipmap.tyhj);
         mRemoteViews.setTextViewText(R.id.from,"From："+name);
@@ -321,15 +329,18 @@ public class ChatService extends Service {
         mBuilder.setContentIntent(pendingIntent);
         mBuilder.setContent(mRemoteViews)
                 .setTicker("有新的消息")
-                .setPriority(Notification.DEFAULT_ALL)
+                .setPriority(Notification.PRIORITY_DEFAULT)
                 .setAutoCancel(true)
                 .setOngoing(false)
                 .setDefaults(Notification.DEFAULT_SOUND)
                 .setLargeIcon(bm)
                 .setSmallIcon(R.drawable.ic_circle_24dp);
         Notification notification = mBuilder.build();
-        notification.flags = Notification.FLAG_AUTO_CANCEL;
         mNotificationManager.notify(1, notification);
+    }
+
+    public static NotificationManager getNotifiManager(){
+        return mNotificationManager;
     }
 
     
@@ -361,4 +372,74 @@ public class ChatService extends Service {
            }
         }
     };
+
+    //设置申请监听
+    private void addSubscriptionListener() {
+        PacketFilter filter = new PacketFilter() {
+            @Override
+            public boolean accept(Packet packet) {
+                if (packet instanceof Presence) {
+                    Presence presence = (Presence) packet;
+                    if (presence.getType().equals(Presence.Type.subscribe)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+        xmppConnection.addPacketListener(subscriptionPacketListener, filter);
+    }
+
+    //好友申请监听
+    private PacketListener subscriptionPacketListener = new PacketListener() {
+
+        @Override
+        public void processPacket(Packet packet) {
+            String user = getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE).getString("name", null);
+            if (packet.getFrom().contains(user))
+                return;
+            Presence subscription = new Presence(Presence.Type.subscribe);
+            subscription.setTo(packet.getFrom());
+            xmppConnection.sendPacket(subscription);
+            notificationBar(packet.getFrom(),"来自"+packet.getFrom()+"的好友申请",1);
+        }
+    };
+
+    public static void savaDate(final List<Group> list){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                List<Group> list2=new SharedData(Application.getContext()).getGroups();
+                if(list2==null)
+                    list2=new ArrayList<Group>();
+                for(int i=0;i<list2.size();i++){
+                    if(!list.contains(list2.get(i)))
+                        list.add(list2.get(i));
+                }
+                new SharedData(Application.getContext()).savaGrops(list);
+            }
+        }).start();
+
+    }
+
+    public static void savaDate(final List<Msg_chat> list, final String name){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new SharedData(Application.getContext()).saveData(list,name);
+            }
+        }).start();
+
+    }
+
+    public static void savaDate(final Group group){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new SharedData(Application.getContext()).addGrops(group);
+            }
+        }).start();
+
+    }
+
 }
