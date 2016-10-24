@@ -293,6 +293,36 @@ public class MyFunction {
             e.printStackTrace();
         }
     }
+//图片压缩
+    public static void ImgCompress(String filePath,File newFile,int x,int y,int size) {
+        int imageMg=100;
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(filePath, options);
+        //规定要压缩图片的分辨率
+        options.inSampleSize = calculateInSampleSize(options,x,y);
+        options.inJustDecodeBounds = false;
+        Bitmap bitmap= BitmapFactory.decodeFile(filePath, options);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, imageMg, baos);
+        //如果文件大于100KB就进行质量压缩，每次压缩比例增加百分之五
+        while (baos.toByteArray().length / 1024 > size&&imageMg>50){
+            baos.reset();
+            imageMg-=5;
+            bitmap.compress(Bitmap.CompressFormat.JPEG, imageMg, baos);
+        }
+        //然后输出到指定的文件中
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(newFile);
+            fos.write(baos.toByteArray());
+            fos.flush();
+            fos.close();
+            baos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     //计算图片的缩放值
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         final int height = options.outHeight;

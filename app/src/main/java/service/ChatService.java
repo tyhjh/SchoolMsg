@@ -110,7 +110,7 @@ public class ChatService extends Service {
 
         //设置好友申请监听
         addSubscriptionListener();
-
+            if(UserInfo.canDo())
             xmppConnection.getChatManager().addChatListener(new ChatManagerListener() {
             @Override
             public void chatCreated(Chat chat, boolean b) {
@@ -125,6 +125,7 @@ public class ChatService extends Service {
 
         MultiUserChat multiUserChat = new ChatRoom(xmppConnection).joinMultiUserChat(UserInfo.getGroupName(),"111","111");
         MyFunction.setMultiUserChat(multiUserChat);
+        if(UserInfo.canDo())
         multiUserChat.addMessageListener(new PacketListener() {
             @Override
             public void processPacket(Packet packet) {
@@ -195,6 +196,7 @@ public class ChatService extends Service {
     };
 
     private Runnable getRun(){
+        if(UserInfo.canDo())
         runnable = new Runnable() {
 
             @Override
@@ -387,6 +389,7 @@ public class ChatService extends Service {
                 return false;
             }
         };
+        if(UserInfo.canDo())
         xmppConnection.addPacketListener(subscriptionPacketListener, filter);
     }
 

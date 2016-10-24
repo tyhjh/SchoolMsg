@@ -53,7 +53,7 @@ public class UserInfo {
 
 
     public static boolean canDo(){
-        if(xmppConnection!=null&&xmppConnection.isConnected()&&xmppConnection.isAuthenticated())
+        if(xmppConnection!=null&&xmppConnection.isConnected())
             return true;
         else
             return false;
@@ -106,9 +106,9 @@ public class UserInfo {
         try {
             if(!MyFunction.isIntenet(context,null))
                 return false;
-
-            if(!canDo())
-                setXmppConnection();
+            setXmppConnection();
+            if(xmppConnection==null||!xmppConnection.isConnected())
+                return false;
             xmppConnection.login(name, pas);
             Presence presence = new Presence(Presence.Type.available);
             xmppConnection.sendPacket(presence);
@@ -145,6 +145,8 @@ public class UserInfo {
 
             if(!canDo())
                 setXmppConnection();
+            if(!canDo())
+                return false;
 
             xmppConnection.login(id, shared.getString("pas",null));
             Presence presence = new Presence(Presence.Type.available);
@@ -353,8 +355,9 @@ public class UserInfo {
 
     //获取用户头像
     public static byte[] getUserImage(String user) {
-        if(!canDo())
+        if(!canDo()){
             return null;
+        }
         ByteArrayInputStream bais = null;
         try {
             VCard vcard = new VCard();

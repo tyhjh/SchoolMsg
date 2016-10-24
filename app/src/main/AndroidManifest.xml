@@ -51,10 +51,6 @@
             android:name="service.ChatService"
             android:enabled="true"
             android:exported="true"></service>
-        <service
-            android:name="service.LogService"
-            android:enabled="true"
-            android:exported="true"></service>
 
     </application>
 

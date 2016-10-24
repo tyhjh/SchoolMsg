@@ -144,7 +144,8 @@ public class Chat extends Fragment {
         if(groups!=null)
         for (int i = 0; i < groups.size(); i++) {
             if (groups.get(i).getGroupName().equals(name)) {
-                groupAdapter_land.addItem(groups.get(i));
+                if(!groups_land.contains(groups.get(i)))
+                    groupAdapter_land.addItem(groups.get(i));
                 return;
             }
         }
@@ -213,6 +214,10 @@ public class Chat extends Fragment {
                 for(int i=0;i<groupList.size();i++){
                     if(!groups.contains(groupList.get(i)))
                         groups.add(groupList.get(i));
+                    else{
+                        groups.remove(groups.indexOf(groupList.get(i)));
+                        groups.add(groupList.get(i));
+                    }
                 }
             }
             update();

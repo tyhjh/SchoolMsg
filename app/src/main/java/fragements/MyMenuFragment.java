@@ -3,11 +3,7 @@ package fragements;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +13,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,33 +23,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.avos.avoscloud.AVException;
-import com.avos.avoscloud.AVFile;
-import com.avos.avoscloud.AVObject;
-import com.avos.avoscloud.SaveCallback;
-import com.example.tyhj.schoolmsg.Login;
 import com.example.tyhj.schoolmsg.Login_;
 import com.example.tyhj.schoolmsg.R;
-import com.example.tyhj.schoolmsg.SendMessage;
 import com.mxn.soul.flowingdrawer_core.MenuFragment;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.download.ImageDownloader;
 import com.squareup.picasso.Picasso;
 import com.tyhj.myfist_2016_6_29.MyTime;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 
 import api.FormatTools;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
-import service.ChatService;
 
 import static android.content.Intent.ACTION_GET_CONTENT;
 
 
 public class MyMenuFragment extends MenuFragment {
     private static String PATH="http://115.28.16.220:8080/Upload/uploadFile/p123.JPEG";
+    String headImage;
     NavigationView navigationView;
     View view;
     Button camoral, images;
@@ -73,7 +63,6 @@ public class MyMenuFragment extends MenuFragment {
         imageView=(ImageView) view.findViewById(R.id.userheadImage);
         imageView.setOutlineProvider(MyFunction.getOutline(true,20,0));
         imageView.setClipToOutline(true);
-
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,6 +75,26 @@ public class MyMenuFragment extends MenuFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        com.ant.liao.GifView gifView= (com.ant.liao.GifView) view.findViewById(R.id.gif);
+        gifView.setGifImage(R.mipmap.gif3);
+        gifView.setGifImageType(com.ant.liao.GifView.GifImageType.COVER);
+        gifView.setShowDimension(900, 820);
+        navigtion();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                if(MyFunction.isRegister()&&UserInfo.getId().equals(MyFunction.getRegisterId())) {
+                    handler.sendEmptyMessage(2);
+                    MyFunction.setRegister(false);
+                }else
+                    drawable = FormatTools.getInstance().Bytes2Drawable(UserInfo.getUserImage(UserInfo.getId()));
+                if (drawable != null)
+                    handler.sendEmptyMessage(1);
+            }
+        }).start();
+    }
+    //侧栏菜单
+    public void navigtion() {
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -118,17 +127,8 @@ public class MyMenuFragment extends MenuFragment {
                 return false;
             }
         });
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (!UserInfo.canDo()){
-
-                }
-                drawable=FormatTools.getInstance().Bytes2Drawable(UserInfo.getUserImage(UserInfo.getId()));
-                handler.sendEmptyMessage(1);
-            }
-        }).start();
     }
+
     public void onOpenMenu(){
 
     }
@@ -214,9 +214,17 @@ public class MyMenuFragment extends MenuFragment {
                 if (resultCode == getActivity().RESULT_OK) {
                     final String fileName = path + "/" + date;
                     File newFile = new File(path, date);
-                    MyFunction.ImgCompress(fileName, newFile);
+                    headImage=fileName;
+                    MyFunction.ImgCompress(fileName, newFile,100,100,50);
                     //获取到的就是new File或fileName
-                    UserInfo.changeImage(new File(path, date));
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(UserInfo.changeImage(new File(path, date)))
+                                handler.sendEmptyMessage(3);
+                        }
+                    }).start();
+
                 }
                 break;
             default:
@@ -247,6 +255,12 @@ public class MyMenuFragment extends MenuFragment {
                 case 1:imageView.setImageDrawable(drawable);
                     break;
                 case 2:
+                    imageView.setImageResource(R.mipmap.default_headimage);
+                    break;
+                case 3:
+                    ImageLoader imageLoader=ImageLoader.getInstance();
+                    String imageUrl = ImageDownloader.Scheme.FILE.wrap(headImage);
+                    imageLoader.displayImage(imageUrl,imageView, MyFunction.getOption());
                     break;
             }
         }
