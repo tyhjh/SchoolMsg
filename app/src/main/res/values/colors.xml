@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#fc0</color>
-    <color name="colorPrimaryDark">#FF4081</color>
-    <color name="colorAccent">#09aea4</color>
+    <color name="colorPrimary">#09aea4</color>
+    <color name="colorPrimaryDark">#fc0</color>
+    <color name="colorAccent">#FF4081</color>
     <color name="login">#afffcc00</color>
     <color name="ichome">#a1a1a1</color>
     <color name="btn">#e1e1e1</color>
     <color name="white">#ffffff</color>
     <color name="blue">#2ca6cb</color>
+    <color name="green">#3BAE61</color>
     <color name="purple">#6714d0</color>
+    <color name="color1from">#ddcc00</color>
+    <color name="color1to">#a0ffcc00</color>
+    <color name="color2from">#1ba2ba</color>
+    <color name="color2to">#2ca6cb</color>
+    <color name="bg">#f4f4f4</color>
 </resources>

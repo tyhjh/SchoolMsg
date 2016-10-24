@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Display;
@@ -21,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.Application;
 import com.example.tyhj.schoolmsg.R;
@@ -53,7 +56,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
     Context context;
     private LayoutInflater mInflater;
     ImageLoader imageLoader;
-
+    int remove;
     View view;
 
     public void setView(View view) {
@@ -95,6 +98,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         if (msgChatList != null && msgChatList.size() > 0) {
             msg_chat = msgChatList.get(msgChatList.size() - 1);
             holder.tv_send_time.setText(MyFunction.getTime2(msg_chat.getTime()));
+            group.setLastTime(msg_chat.getTime());
             holder.tv_text.setText(msg_chat.getText());
             if (msg_chat.getWho() == 1)
                 holder.tv_who_send.setText("你：");
@@ -197,6 +201,16 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
                     @Override
                     public void onClick(View v) {
                         di.cancel();
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if(UserInfo.removeUser(group.getGroupName())){
+                                    groups.remove(group);
+                                    remove=holder.getPosition();
+                                    handler.sendEmptyMessage(1);
+                                }
+                            }
+                        }).start();
                     }
                 });
 
@@ -225,6 +239,11 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
         Bundle bundle = new Bundle();
         bundle.putSerializable("group", group);
         intent.putExtras(bundle);
+        int position=groups.indexOf(group);
+        groups.remove(position);
+        groups.add(0,group);
+        notifyItemMoved(position,0);
+
         ChatService.savaDate(group);
         context.startActivity(intent);
     }
@@ -267,4 +286,16 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupHolder>
             tv_msgCount = (TextView) view.findViewById(R.id.tv_msgCount);
         }
     }
+
+
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 1:
+                    notifyItemRemoved(remove);
+                    break;
+            }
+        }
+    };
 }

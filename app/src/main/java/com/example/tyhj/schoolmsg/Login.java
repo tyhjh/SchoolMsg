@@ -59,8 +59,14 @@ public class Login extends AppCompatActivity {
         Picasso.with(Login.this).load(R.mipmap.default_headimage).into(UserHeadImaegLg);
         Picasso.with(Login.this).load(R.drawable.im_user).resize(100, 100).centerCrop().into(iv_user);
         Picasso.with(Login.this).load(R.drawable.im_pas).resize(100, 100).centerCrop().into(iv_pas);
+        delete();
     }
 
+    @UiThread(delay = 2000)
+    void delete() {
+        SharedPreferences shared = getSharedPreferences("group_date", Context.MODE_PRIVATE);
+        shared.edit().clear().commit();
+    }
 
     @Click(R.id.tvsign)
     void setTvsign(){

@@ -19,6 +19,7 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        renderscriptSupportModeEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -50,11 +51,14 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.mxn.soul:flowingdrawer-core:1.2.5'
     compile 'com.nineoldandroids:library:2.4.0'
-    compile files('libs/asmack.jar')
     compile files('libs/commons-codec-1.10.jar')
     compile files('libs/Ysd-first-2016.6.29.jar')
     compile files('libs/universal-image-loader-1.9.5.jar')
     // LeanCloud 基础包
     compile 'cn.leancloud.android:avoscloud-sdk:v3.+'
+    //gif
     compile files('libs/GifView.jar')
+    //recycle 侧滑
+    compile 'com.yanzhenjie:recyclerview-swipe:1.0.2'
+    compile files('libs/asmack.jar')
 }

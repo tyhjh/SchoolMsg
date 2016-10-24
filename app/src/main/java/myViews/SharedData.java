@@ -16,23 +16,20 @@ import java.util.List;
 import publicinfo.GetChatMsg;
 import publicinfo.Group;
 import publicinfo.Msg_chat;
+import publicinfo.Notice;
 import publicinfo.UserInfo;
 
 public  class SharedData {
   
     private Context context;
-  
-    private SharedPreferences shared;
 
-    private SharedPreferences groupShared;
-  
     public SharedData(Context context) {
         this.context = context;
-        shared = context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
-        groupShared=context.getSharedPreferences("group_date",Context.MODE_PRIVATE);
     }  
-  
+
+
     public void saveData(List<Msg_chat> msg_chats,String name) {
+        SharedPreferences shared = context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             // 创建对象输出流，并封装字节流  
@@ -51,6 +48,7 @@ public  class SharedData {
     }  
   
     public List<Msg_chat> getData(String name) {
+        SharedPreferences shared = context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
         List<Msg_chat> chats = null;
         String productBase64 = shared.getString(name, null);
         if(productBase64==null) {
@@ -69,11 +67,11 @@ public  class SharedData {
             // TODO Auto-generated catch block  
             e.printStackTrace();  
         }
-        Log.e("xxxxxxx","数据库获取成功"+chats.size());
         return chats;
     }
 
     public void savaGrops(List<Group> groups){
+        SharedPreferences shared=context.getSharedPreferences("group_date",Context.MODE_PRIVATE);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             // 创建对象输出流，并封装字节流
@@ -83,7 +81,7 @@ public  class SharedData {
             // 将字节流编码成base64的字符串
             String oAuth_Base64 = new String(Base64.encodeBase64(baos
                     .toByteArray()));
-            SharedPreferences.Editor editor = groupShared.edit();
+            SharedPreferences.Editor editor = shared.edit();
             editor.putString(UserInfo.getId(), oAuth_Base64);
             editor.commit();
         } catch (Exception e) {
@@ -101,8 +99,9 @@ public  class SharedData {
     }
 
     public List<Group> getGroups() {
+        SharedPreferences shared=context.getSharedPreferences("group_date",Context.MODE_PRIVATE);
         List<Group> chats = null;
-        String productBase64 = groupShared.getString(UserInfo.getId(), null);
+        String productBase64 = shared.getString(UserInfo.getId(), null);
         if(productBase64==null) {
             return null;
         }
@@ -121,4 +120,47 @@ public  class SharedData {
         }
         return chats;
     }
+
+    public List<Notice> getNotices() {
+        List<Notice> notices= null;
+        SharedPreferences shared = context.getSharedPreferences("notice_date", Context.MODE_PRIVATE);
+        String productBase64 = shared.getString(UserInfo.getId(), null);
+        if(productBase64==null) {
+            return null;
+        }
+        // 读取字节
+        byte[] base64 = Base64.decodeBase64(productBase64.getBytes());
+        // 封装到字节流
+        ByteArrayInputStream bais = new ByteArrayInputStream(base64);
+        try {
+            // 再次封装
+            ObjectInputStream bis = new ObjectInputStream(bais);
+            // 读取对象
+            notices = (List<Notice>) bis.readObject();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return notices;
+    }
+
+    public void saveNotices(List<Notice> notices) {
+        SharedPreferences shared = context.getSharedPreferences("notice_date", Context.MODE_PRIVATE);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            // 创建对象输出流，并封装字节流
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            // 将对象写入字节流
+            oos.writeObject(notices);
+            // 将字节流编码成base64的字符串
+            String oAuth_Base64 = new String(Base64.encodeBase64(baos
+                    .toByteArray()));
+            SharedPreferences.Editor editor = shared.edit();
+            editor.putString(UserInfo.getId(), oAuth_Base64);
+            editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }  

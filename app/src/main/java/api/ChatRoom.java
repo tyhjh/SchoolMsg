@@ -32,9 +32,9 @@ public class ChatRoom {
         Collection<HostedRoom> hostrooms = null;  
         List<HostedRoom> roominfos = new ArrayList<HostedRoom>();  
         try {  
-            new ServiceDiscoveryManager(connection);  
-            hostrooms = MultiUserChat.getHostedRooms(connection,  
-                    connection.getServiceName());  
+            new ServiceDiscoveryManager(connection);
+            hostrooms = MultiUserChat.getHostedRooms(connection,
+                    connection.getServiceName());
             for (HostedRoom entry : hostrooms) {  
                 roominfos.add(entry);  
 //                Log.i("room",  
@@ -66,11 +66,11 @@ public class ChatRoom {
             // ����������  
             muc.create(roomName);  
             // ��������ҵ����ñ�  
-            Form form = muc.getConfigurationForm();  
+            Form form = muc.getConfigurationForm();
             // ����ԭʼ������һ��Ҫ�ύ���±���  
             Form submitForm = form.createAnswerForm();  
             // ��Ҫ�ύ�ı����Ĭ�ϴ�  
-            for (Iterator<FormField> fields = form.getFields(); fields  
+            for (Iterator<FormField> fields = form.getFields(); fields
                     .hasNext();) {  
                 FormField field = (FormField) fields.next();  
                 if (!FormField.TYPE_HIDDEN.equals(field.getType())  

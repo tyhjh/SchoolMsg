@@ -157,9 +157,11 @@ public class MyMenuFragment extends MenuFragment {
         camoral.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getDate();
                 dialog.cancel();
+                File file=new File(path,date);
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
                 startActivityForResult(intent, TAKE_PHOTO);
             }
         });
@@ -167,6 +169,7 @@ public class MyMenuFragment extends MenuFragment {
         images.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                getDate();
                 dialog.cancel();
                 Intent intent = new Intent(ACTION_GET_CONTENT);
                 intent.setType("image/*");
@@ -183,21 +186,24 @@ public class MyMenuFragment extends MenuFragment {
         switch (requestCode) {
             //这是从相机返回的数据
             case TAKE_PHOTO:
-                getDate();
+
                 if (resultCode == getActivity().RESULT_OK) {
                     if (data != null) {
                         imageUri = data.getData();
                     }
-                    String path_pre = MyFunction.getFilePathFromContentUri(imageUri, contentResolver);
-                    File newFile = new File(path, date);
-                        //压缩图片
-                    MyFunction.ImgCompress(path_pre, newFile);
-                    cropPhoto(Uri.fromFile(newFile));
+                    if(imageUri==null){
+                        File file=new File(path,date);
+                        cropPhoto(Uri.fromFile(file));
+                    }else {
+                        String path_pre = MyFunction.getFilePathFromContentUri(imageUri, contentResolver);
+                        cropPhoto(Uri.fromFile(new File(path_pre)));
+                    }
+
                 }
                 break;
             //这是从相册返回的数据
             case PICK_PHOTO:
-                getDate();
+
                 if (resultCode == getActivity().RESULT_OK) {
                     if (data != null) {
                         imageUri = data.getData();

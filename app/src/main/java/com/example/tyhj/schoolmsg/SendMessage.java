@@ -98,6 +98,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawableResource(R.mipmap.chat_bg);
         signBroadCast();
+        contentResolver = getContentResolver();
         group= (Group) this.getIntent().getSerializableExtra("group");
         StatusBarUtil.setColor(this, Color.parseColor("#00000000"));
         addpicture=AnimationUtils.loadAnimation(this,R.anim.addpicture);
@@ -293,18 +294,22 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     //相册
     @Click(R.id.btn_album)
     void album(){
+        getDate();
+        File file=new File(path,date);
         Intent intent = new Intent(ACTION_GET_CONTENT);
         intent.setType("image/*");
         intent.putExtra("crop", true);
         intent.putExtra("scale", true);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
         startActivityForResult(intent, PICK_PHOTO);
     }
     //相机
     @Click(R.id.btn_camera)
     void camera(){
+        getDate();
+        File file=new File(path,date);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
         startActivityForResult(intent, TAKE_PHOTO);
     }
     //发送消息
@@ -319,6 +324,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
 
     @AfterViews
     void afterViews(){
+        contentResolver = getContentResolver();
         initListView();
         setListener();
         initRecycle();
@@ -353,7 +359,6 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         intentFilter=new IntentFilter();
         intentFilter.addAction("boradcast.action.GETMESSAGE");
         registerReceiver(msgBoradCastReceiver,intentFilter);
-        contentResolver = getContentResolver();
     }
 
     //设置消息为已读
@@ -426,30 +431,26 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         switch (requestCode) {
             //这是从相机返回的数据
             case TAKE_PHOTO:
-                getDate();
                 if (resultCode == this.RESULT_OK) {
-                    if (data != null) {
-                        imageUri = data.getData();
-                    }
-                    String path_pre = MyFunction.getFilePathFromContentUri(imageUri, contentResolver);
+
+                    File file=new File(path,date);
                     File newFile = new File(path, date);
                     if(isBigPicture){
                         try {
                             //复制图片
-                            MyFunction.copyFile(new File(path_pre),newFile);
+                            MyFunction.copyFile(file,newFile);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }else {
                         //压缩图片
-                        MyFunction.ImgCompress(path_pre, newFile);
+                        MyFunction.ImgCompress(file.getAbsolutePath(), newFile);
                     }
                     cropPhoto(Uri.fromFile(newFile));
                 }
                 break;
             //这是从相册返回的数据
             case PICK_PHOTO:
-                getDate();
                 if (resultCode == this.RESULT_OK) {
                     if (data != null) {
                         imageUri = data.getData();

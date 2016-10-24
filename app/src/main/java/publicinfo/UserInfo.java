@@ -427,15 +427,16 @@ public class UserInfo {
     //删除好友
     public static boolean removeUser(String userName) {
         try {
-            if (userName.contains("@")) {
-                userName = userName.split("@")[0];
-            }
-            Roster roster=xmppConnection.getRoster();
-            RosterEntry entry = roster.getEntry(userName);
-            System.out.println("删除好友：" + userName);
-            System.out.println("User." + roster.getEntry(userName) == null);
-            roster.removeEntry(entry);
 
+            RosterEntry entry;
+            if (userName.contains("@"))
+                entry = xmppConnection.getRoster().getEntry(userName);
+            else
+                entry = xmppConnection.getRoster().getEntry(
+                        userName + "@" + xmppConnection.getServiceName());
+            if (entry == null)
+                entry = xmppConnection.getRoster().getEntry(userName);
+            xmppConnection.getRoster().removeEntry(entry);
             return true;
         } catch (Exception e) {
             e.printStackTrace();

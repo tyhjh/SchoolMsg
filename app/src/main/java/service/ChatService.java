@@ -1,6 +1,5 @@
 package service;
 
-import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,7 +8,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,24 +24,18 @@ import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.Application;
-import com.example.tyhj.schoolmsg.Home_;
 import com.example.tyhj.schoolmsg.Login_;
 import com.example.tyhj.schoolmsg.R;
-import com.example.tyhj.schoolmsg.SendMessage;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.tyhj.myfist_2016_6_29.MyTime;
 
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManagerListener;
-import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.PacketListener;
-import org.jivesoftware.smack.ReconnectionManager;
-import org.jivesoftware.smack.Roster;
 import org.jivesoftware.smack.XMPPConnection;
-import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
@@ -56,20 +48,20 @@ import java.util.List;
 
 import api.ChatRoom;
 import myViews.SharedData;
+import publicinfo.Notice;
 import publicinfo.Group;
 import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
 import publicinfo.UserInfo;
 
-import static android.app.PendingIntent.FLAG_NO_CREATE;
-import static android.content.ContentValues.TAG;
-
 public class ChatService extends Service {
 
     Vibrator vibrator;
 
     Runnable runnable;
+
+    String userIp="@120.27.49.173";
 
     static NotificationManager mNotificationManager;
 
@@ -289,8 +281,6 @@ public class ChatService extends Service {
         Msg_chat msg_chat=new Msg_chat(2,type,0,messageBody,null,null,messageFrom, MyFunction.getTime());
 
         if(!Application.getIsLeave()){
-            vibrator = (Vibrator)getSystemService(getApplicationContext().VIBRATOR_SERVICE);
-            vibrator.vibrate(Long.parseLong("300"));
             notificationBar(msg_chat.getName(),msg_chat.getText(),Application.getCount());
         }
 
@@ -315,7 +305,7 @@ public class ChatService extends Service {
         intent.putExtra("msgFrom",messageFrom);
         sendBroadcast(intent);
     }
-
+    //通知栏配置
     private void notificationBar(String name,String text,int count){
         Bitmap bm = BitmapFactory.decodeResource(getResources(),R.drawable.ic_camera_24dp);
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -335,6 +325,7 @@ public class ChatService extends Service {
                 .setAutoCancel(true)
                 .setOngoing(false)
                 .setDefaults(Notification.DEFAULT_SOUND)
+                .setDefaults(Notification.DEFAULT_VIBRATE)
                 .setLargeIcon(bm)
                 .setSmallIcon(R.drawable.ic_circle_24dp);
         Notification notification = mBuilder.build();
@@ -395,7 +386,6 @@ public class ChatService extends Service {
 
     //好友申请监听
     private PacketListener subscriptionPacketListener = new PacketListener() {
-
         @Override
         public void processPacket(Packet packet) {
             String user = getApplicationContext().getSharedPreferences("login", Context.MODE_PRIVATE).getString("name", null);
@@ -404,7 +394,16 @@ public class ChatService extends Service {
             Presence subscription = new Presence(Presence.Type.subscribe);
             subscription.setTo(packet.getFrom());
             xmppConnection.sendPacket(subscription);
-            notificationBar(packet.getFrom(),"来自"+packet.getFrom()+"的好友申请",1);
+            String messageFrom=packet.getFrom().substring(0,packet.getFrom().lastIndexOf(userIp));
+            if(!Application.getIsLeave())
+                notificationBar(messageFrom,"来自"+messageFrom+"的好友申请",1);
+            vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(200);
+            Intent intent=new Intent("boradcast.action.FRIENDAPPLY");
+            Bundle bundle=new Bundle();
+            bundle.putSerializable("friendApply",messageFrom);
+            intent.putExtras(bundle);
+            sendBroadcast(intent);
         }
     };
 
@@ -443,6 +442,15 @@ public class ChatService extends Service {
             }
         }).start();
 
+    }
+
+    public static void savaNoticeDate(final List<Notice> notice){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                new SharedData(Application.getContext()).saveNotices(notice);
+            }
+        }).start();
     }
 
 }

@@ -29,6 +29,7 @@ import api.FormatTools;
 import fragements.Chat;
 import fragements.Chat_;
 import fragements.Msg;
+import fragements.Msg_;
 import fragements.MyMenuFragment;
 import fragements.MyTools;
 import fragements.Pager2;
@@ -92,7 +93,7 @@ public class Home extends AppCompatActivity implements ShowMenu{
                     case 1:
                         return new Pager2();
                     case 2:
-                        return new Msg() ;
+                        return new Msg_() ;
                     case 3:
                         return new MyTools();
                 }

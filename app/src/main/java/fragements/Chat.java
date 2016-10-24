@@ -64,12 +64,29 @@ public class Chat extends Fragment {
             groupAdapter.notifyDataSetChanged();
             if((from=intent.getStringExtra("msgFrom"))!=null){
                 int pos=groups.indexOf(new Group(null,from,0,null));
-                Group date=groups.get(pos);
-                groups.remove(pos);
-                groups.add(0,date);
-                groupAdapter.notifyItemMoved(pos,0);
+                if(pos==-1){
+                    addGroup(from);
+                }else {
+                    Group date = groups.get(pos);
+                    groups.remove(pos);
+                    groups.add(0, date);
+                    groupAdapter.notifyItemMoved(pos, 0);
+                }
+            }
+            if(intent.getIntExtra("updateList",0)==1){
+                initGroups();
             }
         }
+    }
+    @Background
+    public void addGroup(String from) {
+        byte[] head= UserInfo.getUserImage(from);
+        notify(from, head);
+    }
+    @UiThread
+    public void notify(String from, byte[] head) {
+        groups.add(0, new Group(null,from,0,head));
+        groupAdapter.notifyItemInserted(0);
     }
 
     @Override
@@ -175,6 +192,7 @@ public class Chat extends Fragment {
         initList();
         intentFilter = new IntentFilter();
         intentFilter.addAction("boradcast.action.GETMESSAGE2");
+        intentFilter.addAction("boradcast.action.UPDATELIST");
         msgBoradCastReceiver = new MsgBoradCastReceiver();
         getActivity().registerReceiver(msgBoradCastReceiver, intentFilter);
         groupAdapter.setView(ll_view);

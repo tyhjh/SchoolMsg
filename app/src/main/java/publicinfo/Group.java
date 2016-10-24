@@ -1,8 +1,5 @@
 package publicinfo;
 
-import android.graphics.drawable.Drawable;
-
-import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 
 /**
@@ -13,12 +10,23 @@ public class Group implements Serializable {
     String  groupImageUrl,groupName;
     int isgroup;
     byte[] drawable;
+    int lastTime=0;
+
 
     public Group(String groupImageUrl, String groupName, int isgroup,byte[] drawable) {
         this.groupImageUrl = groupImageUrl;
         this.groupName = groupName;
         this.isgroup = isgroup;
         this.drawable=drawable;
+    }
+
+
+    public int getLastTime() {
+        return lastTime;
+    }
+
+    public void setLastTime(int lastTime) {
+        this.lastTime = lastTime;
     }
 
     public byte[] getDrawable() {
