@@ -7,19 +7,26 @@ import java.io.Serializable;
  */
 
 public class Group implements Serializable {
-    String  groupImageUrl,groupName;
+    String groupName;
     int isgroup;
     byte[] drawable;
     int lastTime=0;
+    String id;
 
-
-    public Group(String groupImageUrl, String groupName, int isgroup,byte[] drawable) {
-        this.groupImageUrl = groupImageUrl;
+    public Group(String id,String groupName, int isgroup,byte[] drawable) {
         this.groupName = groupName;
         this.isgroup = isgroup;
         this.drawable=drawable;
+        this.id=id;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public int getLastTime() {
         return lastTime;
@@ -43,14 +50,6 @@ public class Group implements Serializable {
 
     public void setIsgroup(int isgroup) {
         this.isgroup = isgroup;
-    }
-
-    public String getGroupImageUrl() {
-        return groupImageUrl;
-    }
-
-    public void setGroupImageUrl(String groupImageUrl) {
-        this.groupImageUrl = groupImageUrl;
     }
 
     public String getGroupName() {

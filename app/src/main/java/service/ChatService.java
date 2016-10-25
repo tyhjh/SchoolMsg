@@ -400,9 +400,7 @@ public class ChatService extends Service {
             vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
             vibrator.vibrate(200);
             Intent intent=new Intent("boradcast.action.FRIENDAPPLY");
-            Bundle bundle=new Bundle();
-            bundle.putSerializable("friendApply",messageFrom);
-            intent.putExtras(bundle);
+            intent.putExtra("friendApply",messageFrom);
             sendBroadcast(intent);
         }
     };
@@ -411,13 +409,6 @@ public class ChatService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<Group> list2=new SharedData(Application.getContext()).getGroups();
-                if(list2==null)
-                    list2=new ArrayList<Group>();
-                for(int i=0;i<list2.size();i++){
-                    if(!list.contains(list2.get(i)))
-                        list.add(list2.get(i));
-                }
                 new SharedData(Application.getContext()).savaGrops(list);
             }
         }).start();

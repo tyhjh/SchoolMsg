@@ -2,13 +2,13 @@
 <LinearLayout
     android:id="@+id/ll_group"
     android:clickable="true"
+    android:orientation="horizontal"
+    android:padding="10dp"
     android:theme="@style/ButtonTheme"
     style="@style/Widget.AppCompat.Button"
-    android:padding="10dp"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <ImageView
         android:id="@+id/iv_headImage"
         android:layout_width="50dp"

@@ -470,7 +470,11 @@ public class UserInfo {
     }
 
     public static void addGroup(Group group){
-        groups.add(group);
+        if(!groups.contains(group)) groups.add(group);}
+
+    public static void deleteGroup(Group group){
+        if(groups.contains(group))
+        groups.remove(group);
     }
 
     public static String getName() {

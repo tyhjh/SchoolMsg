@@ -11,10 +11,12 @@
         android:id="@+id/iv_yourheadImage"
         android:layout_width="50dp"
         android:layout_height="50dp" />
+
     <android.support.v7.widget.CardView
         android:layout_gravity="center_vertical"
         app:cardBackgroundColor="#56abe4"
         app:cardElevation="0dp"
+        android:layout_marginLeft="5dp"
         app:cardCornerRadius="17dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">

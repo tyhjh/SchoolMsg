@@ -37,6 +37,8 @@ public class Login extends AppCompatActivity {
         if(shared!=null&&shared.getString("name",null)!=null){
             starActivity();
             this.finish();
+        }else {
+            delete1();
         }
     }
 
@@ -59,13 +61,6 @@ public class Login extends AppCompatActivity {
         Picasso.with(Login.this).load(R.mipmap.default_headimage).into(UserHeadImaegLg);
         Picasso.with(Login.this).load(R.drawable.im_user).resize(100, 100).centerCrop().into(iv_user);
         Picasso.with(Login.this).load(R.drawable.im_pas).resize(100, 100).centerCrop().into(iv_pas);
-        delete();
-    }
-
-    @UiThread(delay = 2000)
-    void delete() {
-        SharedPreferences shared = getSharedPreferences("group_date", Context.MODE_PRIVATE);
-        shared.edit().clear().commit();
     }
 
     @Click(R.id.tvsign)
@@ -82,6 +77,7 @@ public class Login extends AppCompatActivity {
         String name,pas;
         name=etUserNumber.getText().toString();
         pas=etUserPassord.getText().toString();
+
         log(name,pas);
     }
 
@@ -108,6 +104,17 @@ public class Login extends AppCompatActivity {
     @UiThread
     void Snack(String s){
         Snackbar.make(btLogin,s,Snackbar.LENGTH_SHORT).show();
+    }
+    @UiThread(delay = 3000)
+    void delete(){
+        SharedPreferences shared2=getSharedPreferences("group_date", Context.MODE_PRIVATE);
+        shared2.edit().clear().commit();
+    }
+
+    @Background
+    void delete1(){
+        SharedPreferences shared2=getSharedPreferences("group_date", Context.MODE_PRIVATE);
+        shared2.edit().clear().commit();
     }
 
 }
