@@ -1,6 +1,7 @@
 package com.example.tyhj.schoolmsg;
 
 import android.annotation.TargetApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.leo.simplearcloader.SimpleArcLoader;
 import com.squareup.picasso.Picasso;
 
 import org.androidannotations.annotations.AfterViews;
@@ -23,6 +26,14 @@ import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import myViews.CircularAnim;
+import myViews.SharedData;
+import publicinfo.Group;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 import service.ChatService;
@@ -38,7 +49,8 @@ public class Login extends AppCompatActivity {
             starActivity();
             this.finish();
         }else {
-            delete1();
+            List<Group> groups=new ArrayList<Group>();
+            new SharedData(this).savaGrops(groups);
         }
     }
 
@@ -54,6 +66,7 @@ public class Login extends AppCompatActivity {
     ImageView iv_user,iv_pas;
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+
     @AfterViews
     void afterViews(){
         UserHeadImaegLg.setOutlineProvider(MyFunction.getOutline(true,20,0));
@@ -65,19 +78,36 @@ public class Login extends AppCompatActivity {
 
     @Click(R.id.tvsign)
     void setTvsign(){
-        startActivity(new Intent(Login.this,Signup_.class));
+        CircularAnim.fullActivity(Login.this, tvsign)
+//                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
+                .go(new CircularAnim.OnAnimationEndListener() {
+                    @Override
+                    public void onAnimationEnd() {
+                        startActivity(new Intent(Login.this,Signup_.class));
+                    }
+                });
     }
+
     @Click(R.id.tvforgetpas)
     void setTvforgetpas(){
-        startActivity(new Intent(Login.this,ChanegPassword_.class));
+        CircularAnim.fullActivity(Login.this, tvforgetpas)
+//                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
+                .go(new CircularAnim.OnAnimationEndListener() {
+                    @Override
+                    public void onAnimationEnd() {
+                        startActivity(new Intent(Login.this,ChanegPassword_.class));
+                    }
+                });
+
     }
 
     @Click(R.id.btLogin)
     void login(){
+        List<Group> groups=new ArrayList<Group>();
+        new SharedData(this).savaGrops(groups);
         String name,pas;
         name=etUserNumber.getText().toString();
         pas=etUserPassord.getText().toString();
-
         log(name,pas);
     }
 
@@ -87,7 +117,6 @@ public class Login extends AppCompatActivity {
             Intent intent=new Intent(this, ChatService.class);
             startService(intent);
             starActivity();
-            this.finish();
         }else {
             Snack("失败");
         }
@@ -97,24 +126,22 @@ public class Login extends AppCompatActivity {
     void Toast(String str){
         Toast.makeText(Login.this,str,Toast.LENGTH_SHORT).show();
     }
+
     @UiThread
     void starActivity(){
-        startActivity(new Intent(Login.this,Home_.class));
+        CircularAnim.fullActivity(Login.this, btLogin)
+//                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
+                .go(new CircularAnim.OnAnimationEndListener() {
+                    @Override
+                    public void onAnimationEnd() {
+                        startActivity(new Intent(Login.this,Home_.class));
+                        Login.this.finish();
+                    }
+                });
     }
+
     @UiThread
     void Snack(String s){
         Snackbar.make(btLogin,s,Snackbar.LENGTH_SHORT).show();
     }
-    @UiThread(delay = 3000)
-    void delete(){
-        SharedPreferences shared2=getSharedPreferences("group_date", Context.MODE_PRIVATE);
-        shared2.edit().clear().commit();
-    }
-
-    @Background
-    void delete1(){
-        SharedPreferences shared2=getSharedPreferences("group_date", Context.MODE_PRIVATE);
-        shared2.edit().clear().commit();
-    }
-
 }

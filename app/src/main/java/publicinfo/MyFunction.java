@@ -10,12 +10,17 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Outline;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.os.Handler;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
+import android.support.v7.internal.VersionUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 import android.widget.Toast;
@@ -37,7 +42,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -272,7 +285,7 @@ public class MyFunction {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         //规定要压缩图片的分辨率
-        options.inSampleSize = calculateInSampleSize(options,720,1280);
+        options.inSampleSize = calculateInSampleSize(options,1080,1920);
         options.inJustDecodeBounds = false;
         Bitmap bitmap= BitmapFactory.decodeFile(filePath, options);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -474,6 +487,89 @@ public class MyFunction {
             cursor.close();
         }
         return filePath;
+    }
+
+    //随机获取文件名字
+    public static String getTimeName() {
+        MyTime myTime = new MyTime();
+        String date = myTime.getYear() + myTime.getMonth_() + myTime.getDays() +
+                myTime.getWeek_() + myTime.getHour() + myTime.getMinute() +
+                myTime.getSecond() + UserInfo.getId();
+        return date;
+    }
+
+    public static String getDate(long x){
+        String str;
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTimeInMillis(x);
+        java.text.SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        str=format.format(gc.getTime());
+        str=str.substring(14,19);
+        return str;
+    }
+
+
+    public static boolean muteAudioFocus(Context context, boolean bMute) {
+        if(context == null){
+            Log.d("ANDROID_LAB", "context is null.");
+            return false;
+        }
+        boolean bool = false;
+        AudioManager am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
+        if(bMute){
+            int result = am.requestAudioFocus(null,AudioManager.STREAM_MUSIC,AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+            bool = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        }else{
+            int result = am.abandonAudioFocus(null);
+            bool = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+        }
+        Log.d("ANDROID_LAB", "pauseMusic bMute="+bMute +" result="+bool);
+        return bool;
+    }
+
+
+    public static void  savaFile(String url, String name, Handler handler, Context context){
+        saveBitmapFile(returnBitMap(url),name,handler,context);
+    }
+    private static Bitmap returnBitMap(String path) {
+        Bitmap bitmap = null;
+        try {
+            java.net.URL url = new URL(path);
+            URLConnection conn = url.openConnection();
+            conn.connect();
+            InputStream is = conn.getInputStream();
+            bitmap = BitmapFactory.decodeStream(is);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+    public static void saveBitmapFile(Bitmap bm, String name, Handler handler,Context context) {
+        if(bm==null)
+            return;
+        File f1 = new File(Environment.getExternalStorageDirectory()+context.getString(R.string.savaphotopath));
+        if(!f1.exists()){
+            f1.mkdirs();
+        }
+        File imageFile = new File(Environment.getExternalStorageDirectory()+context.getString(R.string.savaphotopath),name);
+        if(imageFile.exists()){
+            return;
+        }
+        int options = 100;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bm.compress(Bitmap.CompressFormat.JPEG, options, baos);
+        try {
+            FileOutputStream fos = new FileOutputStream(imageFile);
+            fos.write(baos.toByteArray());
+            fos.flush();
+            fos.close();
+            baos.close();
+            handler.sendEmptyMessage(1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

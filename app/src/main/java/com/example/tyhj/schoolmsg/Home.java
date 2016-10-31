@@ -13,9 +13,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.mxn.soul.flowingdrawer_core.FlowingView;
-import com.mxn.soul.flowingdrawer_core.LeftDrawerLayout;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
@@ -34,6 +31,8 @@ import fragements.MyMenuFragment;
 import fragements.MyTools;
 import fragements.Pager2;
 import myViews.MyViewPager;
+import myViews.waveNavigation.FlowingView;
+import myViews.waveNavigation.LeftDrawerLayout;
 import myinterface.ShowMenu;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;

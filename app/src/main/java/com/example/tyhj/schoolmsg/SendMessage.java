@@ -1,5 +1,6 @@
 package com.example.tyhj.schoolmsg;
 
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -8,7 +9,10 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -17,6 +21,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -58,9 +65,12 @@ import java.util.List;
 
 import adpter.ChatAdpter;
 import adpter.PictureAdpter;
+import api.AudioRecoderUtils;
 import api.FormatTools;
+import api.PopupWindowFactory;
 import myViews.SharedData;
 import myViews.StatusBarUtil;
+import myinterface.ExpendImage;
 import myinterface.sendPicture;
 import publicinfo.Group;
 import publicinfo.Msg_chat;
@@ -72,7 +82,7 @@ import service.ChatService;
 import static android.content.Intent.ACTION_GET_CONTENT;
 
 @EActivity(R.layout.activity_send_message)
-public class SendMessage extends AppCompatActivity implements sendPicture {
+public class SendMessage extends AppCompatActivity implements sendPicture, ExpendImage {
     IntentFilter intentFilter;
     ChatManager chatmanager;
     MsgBoradCastReceiver msgBoradCastReceiver;
@@ -80,7 +90,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     ChatAdpter chatAdpter;
     Group group=null;
     boolean change;
-    Animation big,small,addpicture,overadd;
+    Animation big,small,addpicture,overadd,expend,noexpend,saveup,savedown;
     InputMethodManager imm;
     PictureAdpter pictureAdpter;
     List<Picture> pictures;
@@ -89,10 +99,20 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     ContentResolver contentResolver;
     String date;
     boolean isBigPicture;
+    AudioRecoderUtils mAudioRecoderUtils;
+    ImageView mImageView;
+    TextView mTextView;
+    PopupWindowFactory mPop;
+    float y=0;
     String path = Environment.getExternalStorageDirectory() + "/ASchollMsg";
+    String RECORD_NAME;
     public static final int TAKE_PHOTO = 1;
     public static final int CROP_PHOTO = 2;
     public static final int PICK_PHOTO=0;
+    long time=0;
+    String time_Long;
+    private ImageView ivEssayExpend;
+    private Button saveImage;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +125,10 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         overadd=AnimationUtils.loadAnimation(this,R.anim.addpictureover);
         big= AnimationUtils.loadAnimation(this,R.anim.change_big);
         small=AnimationUtils.loadAnimation(this,R.anim.change_small);
+        expend=AnimationUtils.loadAnimation(this,R.anim.expend);
+        noexpend=AnimationUtils.loadAnimation(this,R.anim.noexpend);
+        saveup=AnimationUtils.loadAnimation(this,R.anim.saveimage_up);
+        savedown=AnimationUtils.loadAnimation(this,R.anim.saveimage_down);
         small.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -134,6 +158,38 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         MyFunction.setChatName(group.getGroupName());
         imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         MyFunction.initPictures();
+        saveup.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                saveImage.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        savedown.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                saveImage.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     //获取选中图片
@@ -147,6 +203,47 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             btn_send_picture.setClickable(false);
         }
         sendPicture=pictures;
+    }
+
+    //查看，保存聊天图片
+    @Override
+    public void callBack(final Msg_chat msg_chat) {
+        Dialog dialog=new Dialog(this,R.style.Dialog_Fullscreen);
+        dialog.setCancelable(true);
+        LayoutInflater inflater=LayoutInflater.from(this);
+        View view=inflater.inflate(R.layout.dialogessayimage,null);
+        dialog.setContentView(view);
+        dialog.create();
+        ivEssayExpend= (ImageView) view.findViewById(R.id.ivEssayExpend);
+        saveImage= (Button) view.findViewById(R.id.btSavaEssayIv);
+        saveImage.setVisibility(View.INVISIBLE);
+        Picasso.with(this).load(msg_chat.getText()).into(ivEssayExpend);
+        android.view.WindowManager.LayoutParams p = dialog.getWindow().getAttributes();  //获取对话框当前的参数值
+        dialog.getWindow().setAttributes(p);     //设置生效
+        dialog.show();
+
+        ivEssayExpend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(saveImage.getVisibility()==View.GONE||saveImage.getVisibility()==View.INVISIBLE)
+                    saveImage.startAnimation(saveup);
+                else
+                    saveImage.startAnimation(savedown);
+            }
+        });
+        saveImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!MyFunction.isIntenet(SendMessage.this))
+                    return;
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MyFunction.savaFile(msg_chat.getText(),group.getGroupName()+MyFunction.getTime()+getString(R.string.imageFormat),handler,SendMessage.this);
+                    }
+                }).start();
+            }
+        });
     }
 
     class MsgBoradCastReceiver extends BroadcastReceiver {
@@ -256,19 +353,10 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         sendPicture.clear();
     }
 
-    @Click(R.id.iv_sound)
-    //发送文字或语音
-    void send() {
-        if(MyFunction.isIntenet(SendMessage.this)&&UserInfo.canDo()){
-        String text=et_text_send.getText().toString();
-        if(change)
-            initSendMsg(text,0,text);
-        }else if(MyFunction.isIntenet(SendMessage.this)){
-            Toast.makeText(SendMessage.this,"重新连接中",Toast.LENGTH_SHORT).show();
-        }
-    }
     //显示发送的消息
     private void initSendMsg(String Url,int type,String path) {
+        if(Url==null||Url.equals(""))
+            return;
         String time;
         if(msg_chatList.size()>0)
             time = MyFunction.getTime(chatAdpter.getMsg_chats().get(chatAdpter.getCount() - 1).getTime());
@@ -316,7 +404,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
     @Background
     public void sendText(String text, Chat newChat,int type)  {
         try {
-            newChat.sendMessage(text+type);
+            newChat.sendMessage(text+type+"size"+time_Long);
         } catch (XMPPException e) {
             e.printStackTrace();
         }
@@ -329,6 +417,32 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         setListener();
         initRecycle();
         btn_send_picture.setClickable(false);
+        final View view = View.inflate(this, R.layout.dialog_recordbutton_alert_dialog, null);
+        mPop = new PopupWindowFactory(this,view);
+        mImageView = (ImageView) view.findViewById(R.id.zeffect_recordbutton_dialog_imageview);
+        mTextView = (TextView) view.findViewById(R.id.zeffect_recordbutton_dialog_time_tv);
+        mAudioRecoderUtils = new AudioRecoderUtils();
+        //录音回调
+        mAudioRecoderUtils.setOnAudioStatusUpdateListener(new AudioRecoderUtils.OnAudioStatusUpdateListener() {
+
+            //录音中....db为声音分贝，time为录音时长
+            @Override
+            public void onUpdate(double db, long time) {
+                //根据分贝值来设置录音时话筒图标的上下波动，下面有讲解
+                mImageView.getDrawable().setLevel((int) (3000 + 6000 * db / 100));
+                mTextView.setText(MyFunction.getDate(time));
+                time_Long=(int)(time/1000)+"";
+            }
+
+            //录音结束，filePath为保存路径
+            @Override
+            public void onStop(String filePath) {
+                //发送语音
+                sendVoice(filePath);
+                mTextView.setText("00:00");
+            }
+        });
+        chatAdpter.setExpendImage(this);
     }
 
     //初始化消息列表
@@ -374,6 +488,71 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
 
     //添加的监听
     private void setListener() {
+        //发送
+        iv_sound.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                String path=null;
+                if(MyFunction.isIntenet(SendMessage.this)&&UserInfo.canDo()){
+                    String text=et_text_send.getText().toString();
+                    if(change){
+                        initSendMsg(text,0,text);
+                        return false;
+                    } else {//录音
+                        MyFunction.muteAudioFocus(SendMessage.this,true);
+                        switch (event.getAction()){
+                            case MotionEvent.ACTION_DOWN:
+                                y=event.getRawY();
+                                time = System.currentTimeMillis();
+                                mPop.showAtLocation(ll_bg, Gravity.CENTER,0,0);
+                                try {
+                                    mAudioRecoderUtils.startRecord();
+                                }catch (RuntimeException e){
+                                    e.printStackTrace();
+                                    Snackbar.make(iv_sound,"先允许调用系统录音权限",Snackbar.LENGTH_SHORT).show();
+                                }
+                                iv_sound.startAnimation(expend);
+                                break;
+                            case MotionEvent.ACTION_UP:
+                                if(System.currentTimeMillis()-time<1000){
+                                    Snackbar.make(iv_sound,"录音时间过短，请重试",Snackbar.LENGTH_SHORT).show();
+                                    mAudioRecoderUtils.cancelRecord();
+                                    mPop.dismiss();
+                                    iv_sound.startAnimation(noexpend);
+                                    break;
+                                }else if(y-event.getRawY()>300){
+                                    Snackbar.make(iv_sound,"已取消发送语音",Snackbar.LENGTH_SHORT).show();
+                                    mAudioRecoderUtils.cancelRecord();
+                                    mPop.dismiss();
+                                    iv_sound.startAnimation(noexpend);
+                                    break;
+                                }else {
+                                    try{
+                                        mAudioRecoderUtils.stopRecord();        //结束录音（保存录音文件）
+                                    }catch (Exception e){
+                                        e.printStackTrace();
+                                        Snackbar.make(iv_sound,"先允许调用系统录音权限",Snackbar.LENGTH_SHORT).show();
+                                    }
+                                    mPop.dismiss();
+                                    iv_sound.startAnimation(noexpend);
+                                    break;
+                                }
+                            case MotionEvent.ACTION_CANCEL:
+                                mAudioRecoderUtils.cancelRecord(); //取消录音（不保存录音文件）
+                                mPop.dismiss();
+                                iv_sound.startAnimation(noexpend);
+                                break;
+                        }
+
+                    }
+                }else if(MyFunction.isIntenet(SendMessage.this)){
+                    Toast.makeText(SendMessage.this,"重新连接中",Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+        });
+
+
         ckb_big.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -384,6 +563,31 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             }
         });
     }
+    //上传发送语音
+    private void sendVoice(final String path) {
+        try {
+            RECORD_NAME=MyFunction.getTimeName();
+            AVFile avFile=AVFile.withAbsoluteLocalPath("record.amr",path);
+            AVObject avObject = new AVObject("Record");
+            avObject.put("record", avFile);
+            avObject.put("user",UserInfo.getId());
+            avObject.put("name",RECORD_NAME);
+            avObject.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(AVException e) {
+                    if(e==null){
+                        File file1=new File(path);
+                        if(file1.exists())
+                            file1.delete();
+                        getRecordUrl(time_Long,RECORD_NAME);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     //初始化本地图片的列表
     private void initRecycle() {
@@ -521,7 +725,22 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
                 if (chatImageUrl != null)
                     initSendMsg(chatImageUrl,1,path);
             }
+        });
+    }
 
+    private void getRecordUrl(final String path, String name) {
+        AVQuery<AVObject> query = new AVQuery<>("Record");
+        query.whereEqualTo("name", name);
+        query.getFirstInBackground(new GetCallback<AVObject>() {
+            @Override
+            public void done(AVObject avObject, AVException e) {
+                // object 就是符合条件的第一个 AVObject
+                if(e!=null||avObject==null)
+                    return;
+                String RecordUrl = avObject.getAVFile("record").getUrl();
+                if (RecordUrl != null)
+                    initSendMsg(RecordUrl,2,path);
+            }
         });
     }
     //上传图片并发送
@@ -532,6 +751,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
             AVObject avObject = new AVObject("Image");
             final AVFile file = AVFile.withAbsoluteLocalPath("chat.JPEG", fileName);
             avObject.put("image", file);
+            avObject.put("user",UserInfo.getId());
             avObject.put("name", group.getGroupName()+ name);
             avObject.saveInBackground(new SaveCallback() {
                 @Override
@@ -551,5 +771,16 @@ public class SendMessage extends AppCompatActivity implements sendPicture {
         }
         return false;
     }
+
+    Handler handler=new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what){
+                case 1:
+                    Toast.makeText(SendMessage.this,"保存成功",Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
 
 }

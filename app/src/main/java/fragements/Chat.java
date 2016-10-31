@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -14,10 +12,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -26,7 +21,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.R;
 import com.yanzhenjie.recyclerview.swipe.Closeable;
@@ -34,7 +28,6 @@ import com.yanzhenjie.recyclerview.swipe.OnSwipeMenuItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuItem;
-import com.yanzhenjie.recyclerview.swipe.SwipeMenuLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 
 import org.androidannotations.annotations.AfterTextChange;
@@ -46,17 +39,14 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.jivesoftware.smack.RosterEntry;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import adpter.GroupAdapter;
+import myViews.CircleRefreshLayout;
 import myViews.SharedData;
 import myinterface.ShowMenu;
 import publicinfo.Group;
-import publicinfo.Msg_chat;
-import publicinfo.MyFunction;
-import publicinfo.Notice;
 import publicinfo.UserInfo;
 import service.ChatService;
 
@@ -70,14 +60,16 @@ public class Chat extends Fragment {
     List<Group> groups, groups_land;
     GroupAdapter groupAdapter, groupAdapter_land;
     String ipAdress = "@120.27.49.173";
-    SwipeMenuCreator swipeMenuCreator;
-    OnSwipeMenuItemClickListener menuItemClickListener;
+    SwipeMenuCreator swipeMenuCreator,swipeMenuCreator1;
+    OnSwipeMenuItemClickListener menuItemClickListener,menuItemClickListener1;
     Group addGroup;
+
     @Background
     public void addGroup(String from) {
         byte[] head= UserInfo.getUserImage(from);
         notify(from, head);
     }
+
     @UiThread
     public void notify(String from, byte[] head) {
         if(UserInfo.getMyGroups().contains(new Group(from,from,0,head)))
@@ -86,6 +78,7 @@ public class Chat extends Fragment {
             groups.add(0, new Group(from,from,2,head));
         groupAdapter.notifyItemInserted(0);
     }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,13 +115,13 @@ public class Chat extends Fragment {
     EditText et_serchqun;
 
     @ViewById
+    CircleRefreshLayout refresh;
+
+    @ViewById
     TextView tv_myqun;
 
     @ViewById
-    RecyclerView  rcly_find_land;
-
-    @ViewById
-    SwipeMenuRecyclerView rcly_qun;
+    SwipeMenuRecyclerView rcly_qun,rcly_find_land;
 
     @Click(R.id.iv_showMenu)
     void showMenu() {
@@ -143,7 +136,7 @@ public class Chat extends Fragment {
             tv_myqun.setVisibility(View.GONE);
             iv_showMenu.setVisibility(View.GONE);
             iv_serchqun.startAnimation(noserch);
-            rcly_qun.setVisibility(View.GONE);
+            refresh.setVisibility(View.GONE);
             ll_serch.setVisibility(View.VISIBLE);
         } else {
             rotate = 1;
@@ -151,7 +144,7 @@ public class Chat extends Fragment {
             tv_myqun.setVisibility(View.VISIBLE);
             iv_showMenu.setVisibility(View.VISIBLE);
             iv_serchqun.startAnimation(noserch);
-            rcly_qun.setVisibility(View.VISIBLE);
+            refresh.setVisibility(View.VISIBLE);
             ll_serch.setVisibility(View.GONE);
         }
     }
@@ -159,19 +152,18 @@ public class Chat extends Fragment {
     @AfterTextChange(R.id.et_serchqun)
     void AfterTextChange(TextView editText) {
         String name = editText.getText().toString().trim();
-        if(groups!=null)
-        for (int i = 0; i < groups.size(); i++) {
-            if (groups.get(i).getGroupName().equals(name)) {
-                if(!groups_land.contains(groups.get(i))) {
-                    addGroup = groups.get(i);
-                    addGroup.setIsgroup(0);
-                    groupAdapter_land.addItem(addGroup);
+        if (groups != null)
+            for (int i = 0; i < groups.size(); i++) {
+                if (groups.get(i).getGroupName().equals(name)) {
+                    if (!groups_land.contains(groups.get(i))) {
+                        addGroup = groups.get(i);
+                        groupAdapter_land.addItem(addGroup);
+                    }
+                    return;
                 }
-                return;
             }
-        }
 
-        if (name.length() == 3)
+        if (name.length() >= 3)
             findUser(name);
     }
 
@@ -179,7 +171,7 @@ public class Chat extends Fragment {
     void findUser(String name) {
         byte[] drawable = UserInfo.getUserImage(name);
         if (drawable != null) {
-            Group group = new Group(null, name, 2, drawable);
+            Group group = new Group(name, name, 2, drawable);
             if (!groupAdapter_land.getGroups().contains(group)) {
                 updateFindUser(groupAdapter_land, group);
             }
@@ -194,6 +186,19 @@ public class Chat extends Fragment {
     @AfterViews
     void afterViews() {
         initList();
+        refresh.setOnRefreshListener(
+                new CircleRefreshLayout.OnCircleRefreshListener() {
+                    @Override
+                    public void refreshing() {
+                        initGroups();
+                        stopRefresh();
+                    }
+
+                    @Override
+                    public void completeRefresh() {
+                        // do something when refresh complete
+                    }
+                });
         intentFilter = new IntentFilter();
         intentFilter.addAction("boradcast.action.FRIENDAPPLY");
         intentFilter.addAction("boradcast.action.GETMESSAGE2");
@@ -216,6 +221,8 @@ public class Chat extends Fragment {
         rcly_qun.setItemAnimator(new DefaultItemAnimator());
         rcly_qun.setSwipeMenuCreator(swipeMenuCreator);
         rcly_qun.setSwipeMenuItemClickListener(menuItemClickListener);
+        rcly_find_land.setSwipeMenuItemClickListener(menuItemClickListener1);
+        rcly_find_land.setSwipeMenuCreator(swipeMenuCreator1);
         initGroups();
     }
 
@@ -229,9 +236,10 @@ public class Chat extends Fragment {
                     String name = list.get(i).getUser();
                     name = name.substring(0, name.indexOf(ipAdress));
                     byte[] drawable = UserInfo.getUserImage(name);
-                    Group group=new Group(null,name,0,drawable);
+                    Group group=new Group(name,name,0,drawable);
                     groupList.add(group);
                 }
+                Log.e("xxxxxxxxxxx",groupList.size()+"在线xxx");
                 UserInfo.setMyGroups(groupList);
                 for(int i=0;i<groupList.size();i++){
                     if(!groups.contains(groupList.get(i)))
@@ -245,9 +253,15 @@ public class Chat extends Fragment {
             update();
         }
     }
+
     @UiThread
     void update() {
         groupAdapter.notifyDataSetChanged();
+    }
+
+    @UiThread(delay = 2500)
+    void stopRefresh(){
+        refresh.finishRefreshing();
     }
 
     private void addLandGroup() {
@@ -256,6 +270,7 @@ public class Chat extends Fragment {
             for (int i = 0; i < groupList.size(); i++) {
                     groups.add(groupList.get(i));
             }
+            Log.e("xxxxxxxxxxx",groupList.size()+"本地xxx");
         }
     }
 
@@ -293,6 +308,7 @@ public class Chat extends Fragment {
         getActivity().unregisterReceiver(msgBoradCastReceiver);
         super.onDestroy();
     }
+
     //添加按钮
     public void swipMenuCreator() {
         swipeMenuCreator = new SwipeMenuCreator() {
@@ -306,7 +322,7 @@ public class Chat extends Fragment {
                             .setText("同意并添加") // 文字。
                             .setTextColor(Color.WHITE) // 文字颜色。
                             .setTextSize(16) // 文字大小。
-                            .setWidth(350)
+                            .setWidth(300)
                             .setHeight(height);
                     swipeRightMenu.addMenuItem(addItem);// 添加一个按钮到右侧侧菜单。.
                     SwipeMenuItem refuseItem = new SwipeMenuItem(getActivity())
@@ -319,13 +335,24 @@ public class Chat extends Fragment {
                             .setHeight(height);
                     swipeRightMenu.addMenuItem(refuseItem);// 添加一个按钮到右侧侧菜单。
                 }else if(viewType==0){
+
+                    SwipeMenuItem deleteItem1 = new SwipeMenuItem(getActivity())
+                            //.setImage(R.mipmap.ic_action_delete) // 图标。
+                            .setBackgroundDrawable(R.drawable.bg_agree)
+                            .setText("置顶") // 文字。
+                            .setTextColor(Color.WHITE) // 文字颜色。
+                            .setTextSize(16) // 文字大小。
+                            .setWidth(200)
+                            .setHeight(height);
+                    swipeRightMenu.addMenuItem(deleteItem1);// 添加一个按钮到右侧侧菜单。.
+
                     SwipeMenuItem deleteItem = new SwipeMenuItem(getActivity())
                             //.setImage(R.mipmap.ic_action_delete) // 图标。
                             .setBackgroundDrawable(R.drawable.bg_delete)
                             .setText("删除消息") // 文字。
                             .setTextColor(Color.WHITE) // 文字颜色。
                             .setTextSize(16) // 文字大小。
-                            .setWidth(300)
+                            .setWidth(250)
                             .setHeight(height);
                     swipeRightMenu.addMenuItem(deleteItem);// 添加一个按钮到右侧侧菜单。.
                 }else if(viewType==2){
@@ -335,7 +362,7 @@ public class Chat extends Fragment {
                             .setText("加为好友") // 文字。
                             .setTextColor(Color.WHITE) // 文字颜色。
                             .setTextSize(16) // 文字大小。
-                            .setWidth(350)
+                            .setWidth(250)
                             .setHeight(height);
                     swipeRightMenu.addMenuItem(addItem);// 添加一个按钮到右侧侧菜单。.
                     SwipeMenuItem refuseItem = new SwipeMenuItem(getActivity())
@@ -353,7 +380,7 @@ public class Chat extends Fragment {
                             .setText("删除消息") // 文字。
                             .setTextColor(Color.WHITE) // 文字颜色。
                             .setTextSize(16) // 文字大小。
-                            .setWidth(300)
+                            .setWidth(250)
                             .setHeight(height);
                     swipeRightMenu.addMenuItem(deleteItem);// 添加一个按钮到右侧侧菜单。.
                 }
@@ -375,9 +402,15 @@ public class Chat extends Fragment {
                 // TODO 如果是删除：推荐调用Adapter.notifyItemRemoved(position)，不推荐Adapter.notifyDataSetChanged();
 
                 if(groupAdapter.getItemViewType(adapterPosition)==0){  //删除消息
-                    if(menuPosition==0){
+                    if(menuPosition==1){
                         groups.remove(adapterPosition);
                         groupAdapter.notifyItemRemoved(adapterPosition);
+                    }
+                    if(menuPosition==0){
+                        Group group=groups.get(adapterPosition);
+                        groups.remove(adapterPosition);
+                        groups.add(0,group);
+                        groupAdapter.notifyItemMoved(adapterPosition,0);
                     }
                 }else if(groupAdapter.getItemViewType(adapterPosition)==1){//好友申请
                     if(menuPosition==0){//同意
@@ -407,10 +440,18 @@ public class Chat extends Fragment {
                             @Override
                             public void run() {
                                 UserInfo.addUser(groups.get(adapterPosition).getGroupName());
-                                groups.get(adapterPosition).setIsgroup(0);
                             }
                         }).start();
                         Snackbar.make(rcly_qun,"已发送好友请求",Snackbar.LENGTH_SHORT).show();
+                        Group group=groups.get(adapterPosition);
+                        groups.get(adapterPosition).setIsgroup(0);
+                        groupAdapter.notifyDataSetChanged();
+                        if(groups_land.contains(group)){
+                            groups_land.remove(group);
+                            group.setIsgroup(0);
+                            groups_land.add(group);
+                            groupAdapter_land.notifyDataSetChanged();
+                        }
                         addGroup=groups.get(adapterPosition);
                         addGroup.setIsgroup(0);
                         UserInfo.addGroup(addGroup);
@@ -425,8 +466,106 @@ public class Chat extends Fragment {
                 }
             }
         };
-    }
 
+
+        swipeMenuCreator1 = new SwipeMenuCreator() {
+            @Override
+            public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int viewType) {
+                int height = ViewGroup.LayoutParams.MATCH_PARENT;
+                if(viewType==0) {
+                    SwipeMenuItem addItem = new SwipeMenuItem(getActivity())
+                            //.setImage(R.mipmap.ic_action_delete) // 图标。
+                            .setBackgroundDrawable(R.drawable.bg_delete)
+                            .setText("删除记录") // 文字。
+                            .setTextColor(Color.WHITE) // 文字颜色。
+                            .setTextSize(16) // 文字大小。
+                            .setWidth(250)
+                            .setHeight(height);
+                    swipeRightMenu.addMenuItem(addItem);// 添加一个按钮到右侧侧菜单。.
+                }else if(viewType==2){
+                    SwipeMenuItem addItem = new SwipeMenuItem(getActivity())
+                            //.setImage(R.mipmap.ic_action_delete) // 图标。
+                            .setBackgroundDrawable(R.drawable.bg_agree)
+                            .setText("加为好友") // 文字。
+                            .setTextColor(Color.WHITE) // 文字颜色。
+                            .setTextSize(16) // 文字大小。
+                            .setWidth(250)
+                            .setHeight(height);
+                    swipeRightMenu.addMenuItem(addItem);// 添加一个按钮到右侧侧菜单。.
+                    SwipeMenuItem refuseItem = new SwipeMenuItem(getActivity())
+                            //.setImage(R.mipmap.ic_action_delete) // 图标。
+                            .setBackgroundDrawable(R.drawable.bg_disagree)
+                            .setText("屏蔽") // 文字。
+                            .setTextColor(Color.WHITE) // 文字颜色。
+                            .setTextSize(16) // 文字大小。
+                            .setWidth(200)
+                            .setHeight(height);
+                    swipeRightMenu.addMenuItem(refuseItem);// 添加一个按钮到右侧侧菜单。
+                    SwipeMenuItem deleteItem = new SwipeMenuItem(getActivity())
+                            //.setImage(R.mipmap.ic_action_delete) // 图标。
+                            .setBackgroundDrawable(R.drawable.bg_delete)
+                            .setText("删除记录") // 文字。
+                            .setTextColor(Color.WHITE) // 文字颜色。
+                            .setTextSize(16) // 文字大小。
+                            .setWidth(250)
+                            .setHeight(height);
+                    swipeRightMenu.addMenuItem(deleteItem);// 添加一个按钮到右侧侧菜单。.
+                }
+            }
+        };
+
+        menuItemClickListener1 = new OnSwipeMenuItemClickListener() {
+            /**
+             * Item的菜单被点击的时候调用。
+             * @param closeable       closeable. 用来关闭菜单。
+             * @param adapterPosition adapterPosition. 这个菜单所在的item在Adapter中position。
+             * @param menuPosition    menuPosition. 这个菜单的position。比如你为某个Item创建了2个MenuItem，那么这个position可能是是 0、1，
+             * @param direction       如果是左侧菜单，值是：SwipeMenuRecyclerView#LEFT_DIRECTION，如果是右侧菜单，值是：SwipeMenuRecyclerView#RIGHT_DIRECTION.
+             */
+            @Override
+            public void onItemClick(Closeable closeable, final int adapterPosition, int menuPosition, int direction) {
+                closeable.smoothCloseMenu();// 关闭被点击的菜单。
+
+                // TODO 如果是删除：推荐调用Adapter.notifyItemRemoved(position)，不推荐Adapter.notifyDataSetChanged();
+
+                if(groupAdapter_land.getItemViewType(adapterPosition)==0){  //删除消息
+                    if(menuPosition==0){
+                        groups_land.remove(adapterPosition);
+                        groupAdapter_land.notifyItemRemoved(adapterPosition);
+                    }
+                }else if(groupAdapter_land.getItemViewType(adapterPosition)==2){//添加好友
+                    if(menuPosition==0){//加好友
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                UserInfo.addUser(groups_land.get(adapterPosition).getGroupName());
+                            }
+                        }).start();
+                        Snackbar.make(rcly_qun,"已发送好友请求",Snackbar.LENGTH_SHORT).show();
+                        Group group=groups_land.get(adapterPosition);
+                        group.setIsgroup(0);
+                        groups_land.get(adapterPosition).setIsgroup(0);
+                        groupAdapter_land.notifyDataSetChanged();
+                        if(groups.contains(group))
+                            groups.remove(group);
+                        groups.add(0,group);
+                        groupAdapter.notifyDataSetChanged();
+                        addGroup=groups.get(adapterPosition);
+                        addGroup.setIsgroup(0);
+                        UserInfo.addGroup(addGroup);
+                    }else if(menuPosition==1){//屏蔽
+                        Snackbar.make(rcly_qun,"已屏蔽",Snackbar.LENGTH_SHORT).show();
+                        groups_land.remove(adapterPosition);
+                        groupAdapter_land.notifyItemRemoved(adapterPosition);
+                    }else if(menuPosition==2){//删除
+                        groups_land.remove(adapterPosition);
+                        groupAdapter_land.notifyItemRemoved(adapterPosition);
+                    }
+                }
+            }
+        };
+
+    }
 
     class MsgBoradCastReceiver extends BroadcastReceiver {
         @Override
@@ -485,8 +624,12 @@ public class Chat extends Fragment {
         public void handleMessage(Message msg) {
             switch (msg.what){
                 case 1:
+                    int position=groups.indexOf(addGroup);
+                    if(groups.contains(addGroup)){
+                        groups.remove(addGroup);
+                    }
                     groups.add(0,addGroup);
-                    groupAdapter.notifyItemInserted(0);
+                    groupAdapter.notifyItemMoved(position,0);
                     break;
             }
         }

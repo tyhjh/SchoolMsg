@@ -15,4 +15,6 @@
     <color name="color2from">#1ba2ba</color>
     <color name="color2to">#2ca6cb</color>
     <color name="bg">#f4f4f4</color>
+    <color name="purple2">#A292C7</color>
+    <color name="cnull">#00000000</color>
 </resources>

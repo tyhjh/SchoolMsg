@@ -96,6 +96,8 @@ public class GroupAdapter extends SwipeMenuAdapter<RecyclerView.ViewHolder> {
             final GroupHolder holder=(GroupHolder) holder1;
             final Group group = groups.get(holder.getPosition());
             Msg_chat msg_chat = null;
+            holder.tv_send_time.setVisibility(View.VISIBLE);
+            holder.tv_who_send.setVisibility(View.VISIBLE);
             holder.iv_type.setVisibility(View.VISIBLE);
             holder.tv_msgCount.setVisibility(View.VISIBLE);
             holder.ib_status.setVisibility(View.VISIBLE);
@@ -166,85 +168,18 @@ public class GroupAdapter extends SwipeMenuAdapter<RecyclerView.ViewHolder> {
                 }
             } else {
                 holder.tv_msgCount.setVisibility(View.GONE);
+                holder.tv_text.setText("");
+                holder.iv_type.setVisibility(View.GONE);
+                holder.ib_status.setVisibility(View.GONE);
+                holder.tv_send_time.setVisibility(View.GONE);
+                holder.tv_who_send.setVisibility(View.GONE);
             }
-
            holder.ll_group.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     chat(group);
                 }
             });
-
-            /* holder.ll_group.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    final Dialog di = new Dialog(context);
-                    di.setCancelable(true);
-                    LayoutInflater inflater = LayoutInflater.from(context);
-                    View layout = inflater.inflate(R.layout.item_set_friends, null);
-                    di.setContentView(layout);
-                    di.create();
-                    Window dialogWindow = di.getWindow();
-                    WindowManager m = ((Activity) context).getWindowManager();
-                    Display d = m.getDefaultDisplay(); // 获取屏幕宽、高用
-                    WindowManager.LayoutParams p = dialogWindow.getAttributes(); // 获取对话框当前的参数值
-                    p.width = (int) (d.getWidth() * 0.75); // 宽度设置为屏幕的0.65
-                    dialogWindow.setAttributes(p);
-                    di.show();
-                    Button sendMessage,add,delete,messge;
-                    sendMessage= (Button) layout.findViewById(R.id.sendMessage);
-                    add= (Button) layout.findViewById(R.id.add);
-                    delete= (Button) layout.findViewById(R.id.delete);
-                    messge= (Button) layout.findViewById(R.id.messge);
-                    if (group.getIsgroup()==2) {
-                        delete.setVisibility(View.GONE);
-                    }else {
-                        add.setVisibility(View.GONE);
-                    }
-                    sendMessage.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            chat(group);
-                            di.cancel();
-                        }
-                    });
-                    add.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            UserInfo.addUser(group.getGroupName());
-                            group.setIsgroup(0);
-                            di.cancel();
-                        }
-                    });
-                    //删除好友
-                    delete.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            di.cancel();
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if(UserInfo.removeUser(group.getGroupName())){
-                                        groups.remove(group);
-                                        remove=holder.getPosition();
-                                        handler.sendEmptyMessage(1);
-                                        UserInfo.deleteGroup(group);
-                                    }
-                                }
-                            }).start();
-                        }
-                    });
-
-                    //查看信息
-                    messge.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            di.cancel();
-                        }
-                    });
-                    return true;
-                }
-            });*/
         }else if(holder1 instanceof  applyHolder){
             applyHolder holder= (applyHolder) holder1;
             final Group group = groups.get(holder.getPosition());

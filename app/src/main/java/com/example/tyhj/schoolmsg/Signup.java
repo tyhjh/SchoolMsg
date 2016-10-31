@@ -22,6 +22,7 @@ import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
 import api.FormatTools;
+import myViews.CircularAnim;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 import service.ChatService;
@@ -45,7 +46,15 @@ public class Signup extends AppCompatActivity {
 
     @Click(R.id.ivRegisterBack)
     void back(){
-        this.finish();
+        CircularAnim.fullActivity(Signup.this, ivRegisterBack)
+//                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
+                .go(new CircularAnim.OnAnimationEndListener() {
+                    @Override
+                    public void onAnimationEnd() {
+                        Signup.this.finish();
+                    }
+                });
+
     }
 
     //获取邮箱验证码
@@ -130,4 +139,10 @@ public class Signup extends AppCompatActivity {
         ivRegisterBack.setOutlineProvider(MyFunction.getOutline(false,20,10));
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        // 添加返回过渡动画.
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+    }
 }

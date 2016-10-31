@@ -1,8 +1,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/ll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/ll_view"
     android:orientation="vertical">
 
     <android.support.v7.widget.CardView
@@ -66,34 +66,42 @@
         </LinearLayout>
     </android.support.v7.widget.CardView>
 
-    <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
-        android:id="@+id/rcly_qun"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="50dp">
-    </com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView>
 
+    <myViews.CircleRefreshLayout
+        app:AniBackColor="#508b90af"
+        app:AniForeColor="#ffffffff"
+        android:id="@+id/refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
+            android:id="@+id/rcly_qun"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="50dp">
+        </com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView>
+    </myViews.CircleRefreshLayout>
 
     <LinearLayout
         android:id="@+id/ll_serch"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical">
-        <TextView
-            android:textColor="@color/ichome"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:layout_margin="10dp"
-            android:text="在线搜索"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
-        <android.support.v7.widget.RecyclerView
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:text="在线搜索"
+            android:textColor="@color/ichome"
+            android:textSize="14sp" />
+
+        <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
             android:id="@+id/rcly_find_land"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        </android.support.v7.widget.RecyclerView>
 
+        </com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView>
     </LinearLayout>
 
 </LinearLayout>

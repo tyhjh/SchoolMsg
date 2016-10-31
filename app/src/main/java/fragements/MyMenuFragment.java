@@ -1,8 +1,10 @@
 package fragements;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -25,7 +27,6 @@ import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.Login_;
 import com.example.tyhj.schoolmsg.R;
-import com.mxn.soul.flowingdrawer_core.MenuFragment;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.download.ImageDownloader;
 import com.squareup.picasso.Picasso;
@@ -34,6 +35,8 @@ import com.tyhj.myfist_2016_6_29.MyTime;
 import java.io.File;
 
 import api.FormatTools;
+import myViews.CircularAnim;
+import myViews.waveNavigation.MenuFragment;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 
@@ -56,7 +59,7 @@ public class MyMenuFragment extends MenuFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_menu, container, false);
+        view = inflater.inflate(R.layout.fragment_menu, null, false);
         navigationView= (NavigationView) view.findViewById(R.id.vNavigation);
         contentResolver=getActivity().getContentResolver();
         TextView textView= (TextView) view.findViewById(R.id.signature);
@@ -76,7 +79,7 @@ public class MyMenuFragment extends MenuFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         com.ant.liao.GifView gifView= (com.ant.liao.GifView) view.findViewById(R.id.gif);
-        gifView.setGifImage(R.mipmap.gif3);
+        gifView.setGifImage(R.mipmap.gif1);
         gifView.setGifImageType(com.ant.liao.GifView.GifImageType.COVER);
         gifView.setShowDimension(900, 820);
         navigtion();
@@ -117,8 +120,15 @@ public class MyMenuFragment extends MenuFragment {
                         break;
                     case R.id.menu_logout:
                         UserInfo.logout(getActivity());
-                        startActivity(new Intent(getActivity(), Login_.class));
-                        getActivity().finish();
+                        CircularAnim.fullActivity(getActivity(), view)
+//                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
+                                .go(new CircularAnim.OnAnimationEndListener() {
+                                    @Override
+                                    public void onAnimationEnd() {
+                                        startActivity(new Intent(getActivity(), Login_.class));
+                                        getActivity().finish();
+                                    }
+                                });
                         break;
                     case R.id.menu_about:
                         //删除数据

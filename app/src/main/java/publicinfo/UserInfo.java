@@ -8,6 +8,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 
+import com.avos.avoscloud.AVException;
+import com.avos.avoscloud.AVObject;
+import com.avos.avoscloud.AVQuery;
+import com.avos.avoscloud.DeleteCallback;
+import com.avos.avoscloud.FindCallback;
+import com.avos.avoscloud.GetCallback;
 import com.tyhj.myfist_2016_6_29.MyTime;
 
 import org.jivesoftware.smack.AccountManager;
@@ -134,7 +140,7 @@ public class UserInfo {
                 return false;
 
             if(MyFunction.isServiceRun(context,"service.ChatService")){
-                xmppConnection= ChatService.getConnection();
+                    xmppConnection= ChatService.getConnection();
                 return true;
             }
 
@@ -180,11 +186,36 @@ public class UserInfo {
         SharedPreferences shared=context.getSharedPreferences("login", Context.MODE_PRIVATE);
         shared.edit().clear().commit();
 
-        shared = context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
+        shared=context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
         shared.edit().clear().commit();
+
 
         if(UserInfo.canDo())
             xmppConnection.disconnect();
+        final AVQuery<AVObject> query = new AVQuery<>("Image");
+        query.whereEqualTo("user",UserInfo.getId());
+        query.findInBackground(new FindCallback<AVObject>() {
+            @Override
+            public void done(List<AVObject> list, AVException e) {
+                if(e==null&&list.size()>0){
+                    for(int i=0;i<list.size();i++){
+                        list.get(i).deleteInBackground();
+                    }
+                }
+            }
+        });
+        final AVQuery<AVObject> query1 = new AVQuery<>("Record");
+        query1.whereEqualTo("user",UserInfo.getId());
+        query1.findInBackground(new FindCallback<AVObject>() {
+            @Override
+            public void done(List<AVObject> list, AVException e) {
+                if(e==null&&list.size()>0){
+                    for(int i=0;i<list.size();i++){
+                        list.get(i).deleteInBackground();
+                    }
+                }
+            }
+        });
         Intent intent=new Intent(context, ChatService.class);
         context.stopService(intent);
     }

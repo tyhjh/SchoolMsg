@@ -13,4 +13,16 @@
     <string name="textUrl2">http://img-download.pchome.net/download/1k0/mb/2l/o758dw-gke.jpg</string>
     <string name="textUrl3">http://img.pconline.com.cn/images/upload/upc/tx/wallpaper/1512/30/c0/17067182_1451485607817_800x600.jpg</string>
     <string name="textUrl4">http://ac-tv2pl6bu.clouddn.com/6qHjxSn5R6PcSDfFulfsKTT57VLU4bnC0eZwIJxm.jpg</string>
+
+
+    <string name="zeffect_recordbutton_finger_up_to_cancal_send">手指上滑，取消发送</string>
+    <string name="zeffect_recordbutton_releasing_finger_to_cancal_send">松开手指，取消发送</string>
+    <string name="zeffect_recordbutton_time_too_short">时间太短</string>
+    <string name="savaphotopath">/ASchollMsg</string>
+    <string name="imageFormat">.JPEG</string>
+
+    <array name="colors_1">
+        <item>#fc0</item>
+        <item>#fc0</item>
+    </array>
 </resources>

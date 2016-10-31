@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import com.avos.avoscloud.AVOSCloud;
 
+import myViews.CircularAnim;
 import publicinfo.Group;
 import publicinfo.MyFunction;
 import service.ChatService;
@@ -22,6 +23,7 @@ public class Application extends android.app.Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CircularAnim.init(700, 500, R.color.color2from);
         //如果使用美国节点，请加上这行代码 AVOSCloud.useAVCloudUS();
         AVOSCloud.initialize(this, "Yi6HruJsj4h2bufroQKC9kJT-gzGzoHsz", "2nWoF8MhHN6kibFs72bVhLWV");
         this.context=getApplicationContext();

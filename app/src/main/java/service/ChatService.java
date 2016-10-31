@@ -273,26 +273,36 @@ public class ChatService extends Service {
         MyFunction.setPictureList(pictures);
     }
 
+    //发送广播
     public void sendBroadCast(Message message,String divi) {
         Application.setCount(Application.getCount()+1);
-        int type=Integer.parseInt(message.getBody().substring(message.getBody().length()-1,message.getBody().length()));
-        String messageBody = message.getBody().substring(0,message.getBody().length()-1);
+        String body=message.getBody();
+        String str=body.substring(0,body.lastIndexOf("size"));
+        String count=body.substring(body.lastIndexOf("size")+4,body.length());
+        int type=Integer.parseInt(str.substring(str.length()-1,str.length()));
+        String messageBody = str.substring(0,str.length()-1);
         String messageFrom=message.getFrom().substring(0,message.getFrom().lastIndexOf(divi));
-        Msg_chat msg_chat=new Msg_chat(2,type,0,messageBody,null,null,messageFrom, MyFunction.getTime());
+        Msg_chat msg_chat=new Msg_chat(2,type,0,messageBody,count,null,messageFrom, MyFunction.getTime());
 
         if(!Application.getIsLeave()){
-            notificationBar(msg_chat.getName(),msg_chat.getText(),Application.getCount());
+            if(type==0)
+                notificationBar(msg_chat.getName(),msg_chat.getText(),Application.getCount());
+            else if(type==1)
+                notificationBar(msg_chat.getName(),"图片",Application.getCount());
+            else if(type==2)
+                notificationBar(msg_chat.getName(),"语音",Application.getCount());
+            else if(type==3)
+                notificationBar(msg_chat.getName(),"文件",Application.getCount());
         }
 
 
         if(MyFunction.getChatName()!=null&&MyFunction.getChatName().equals(messageFrom)){
             Intent intent=new Intent("boradcast.action.GETMESSAGE");
             Bundle bundle=new Bundle();
-            bundle.putSerializable("newMsg",new Msg_chat(2,type,2,messageBody,null,null,messageFrom,MyFunction.getTime()));
+            bundle.putSerializable("newMsg",new Msg_chat(2,type,2,messageBody,count,null,messageFrom,MyFunction.getTime()));
             intent.putExtras(bundle);
             sendBroadcast(intent);
         }
-
 
         System.out.println(msg_chat.getName()+" xxxx"+msg_chat.getText()+"xxxx"+msg_chat.getType());
         List<Msg_chat> msg_chatList;
@@ -409,6 +419,10 @@ public class ChatService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                for(int i=0;i<UserInfo.getMyGroups().size();i++){
+                    if(!list.contains(UserInfo.getMyGroups().get(i)))
+                        list.add(UserInfo.getMyGroups().get(i));
+                }
                 new SharedData(Application.getContext()).savaGrops(list);
             }
         }).start();
