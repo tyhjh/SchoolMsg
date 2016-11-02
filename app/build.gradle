@@ -16,17 +16,26 @@ android {
     defaultConfig {
         applicationId "com.example.tyhj.schoolmsg"
         minSdkVersion 16
-        targetSdkVersion 24
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
         renderscriptSupportModeEnabled true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        ndk {
+            // 加了其他的文件夹（比如 armeabi-v7a，x86等）可能会出问题
+            abiFilters "armeabi"
+        }
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    sourceSets.main{
+        //让AS识别libs下的.so第三方包
+        jniLibs.srcDirs =['libs']
     }
 }
 
@@ -51,9 +60,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile files('libs/commons-codec-1.10.jar')
     compile files('libs/Ysd-first-2016.6.29.jar')
-
     compile 'com.nineoldandroids:library:2.4.0'
-
     compile 'com.mxn.soul:flowingdrawer-core:1.2.5'
     compile files('libs/universal-image-loader-1.9.5.jar')
     // LeanCloud 基础包

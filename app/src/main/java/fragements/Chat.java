@@ -23,6 +23,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.tyhj.schoolmsg.R;
+import com.example.tyhj.schoolmsg.Rebot_;
 import com.yanzhenjie.recyclerview.swipe.Closeable;
 import com.yanzhenjie.recyclerview.swipe.OnSwipeMenuItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
@@ -35,6 +36,7 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.LongClick;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.jivesoftware.smack.RosterEntry;
@@ -147,6 +149,11 @@ public class Chat extends Fragment {
             refresh.setVisibility(View.VISIBLE);
             ll_serch.setVisibility(View.GONE);
         }
+    }
+
+    @LongClick(R.id.iv_serchqun)
+    void longClick(){
+        startActivity(new Intent(getActivity(), Rebot_.class));
     }
 
     @AfterTextChange(R.id.et_serchqun)
