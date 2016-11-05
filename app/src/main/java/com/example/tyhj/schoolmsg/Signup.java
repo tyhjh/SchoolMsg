@@ -12,6 +12,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.WebResource;
+
 import org.androidannotations.annotations.AfterTextChange;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Background;
@@ -34,6 +37,8 @@ public class Signup extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Client client=Client.create();
+        WebResource webResource=client.resource("");
     }
 
     @ViewById

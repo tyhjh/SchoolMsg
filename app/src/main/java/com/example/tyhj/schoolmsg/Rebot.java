@@ -8,11 +8,9 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.ant.liao.GifView;
 import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
-import com.squareup.picasso.Picasso;
 import com.turing.androidsdk.InitListener;
 import com.turing.androidsdk.SDKInit;
 import com.turing.androidsdk.SDKInitBuilder;
@@ -26,8 +24,6 @@ import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
-import org.jivesoftware.smack.Chat;
-import org.jivesoftware.smack.XMPPException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,12 +31,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import adpter.ChatAdpter;
-import api.FormatTools;
 import myViews.SharedData;
 import myViews.StatusBarUtil;
 import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
-import publicinfo.UserInfo;
 import service.ChatService;
 import turing.os.http.core.ErrorMessage;
 import turing.os.http.core.HttpConnectionListener;
@@ -137,7 +131,7 @@ public class Rebot extends AppCompatActivity {
         iv_heagImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
         lv_msg.setSelection(chatAdpter.getCount()-1);
         //单人聊天的头像
-        chatAdpter.setHeadImage(getResources().getDrawable(R.mipmap.rebot2));
+        chatAdpter.setHeadImage(getResources().getDrawable(R.mipmap.rebbot_head2));
         lv_msg.setOnScrollListener(new PauseOnScrollListener(chatAdpter.getImageLoader(),true,true));
     }
 
@@ -157,7 +151,7 @@ public class Rebot extends AppCompatActivity {
     @AfterViews
     void afterView(){
         initListView();
-        iv_heagImage.setGifImage(R.mipmap.rebot);
+        iv_heagImage.setGifImage(R.mipmap.rebot_head);
         iv_heagImage.setGifImageType(GifView.GifImageType.COVER);
         iv_heagImage.setShowDimension(110, 110);
     }
