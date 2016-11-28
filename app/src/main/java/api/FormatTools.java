@@ -84,7 +84,9 @@ public class FormatTools {
     }  
   
     // byte[]转换成Drawable  
-    public Drawable Bytes2Drawable(byte[] b) {  
+    public Drawable Bytes2Drawable(byte[] b) {
+        if(b==null)
+            return null;
         Bitmap bitmap = this.Bytes2Bitmap(b);  
         return this.bitmap2Drawable(bitmap);  
     }  

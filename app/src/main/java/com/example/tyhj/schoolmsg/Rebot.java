@@ -1,6 +1,7 @@
 package com.example.tyhj.schoolmsg;
 
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -127,11 +128,13 @@ public class Rebot extends AppCompatActivity {
         setMsgStatus();
         chatAdpter=new ChatAdpter(Rebot.this,0,msg_chatList);
         lv_msg.setAdapter(chatAdpter);
-        iv_heagImage.setClipToOutline(true);
-        iv_heagImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            iv_heagImage.setClipToOutline(true);
+            iv_heagImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
+        }
         lv_msg.setSelection(chatAdpter.getCount()-1);
         //单人聊天的头像
-        chatAdpter.setHeadImage(getResources().getDrawable(R.mipmap.rebbot_head2));
+        chatAdpter.setHeadImage(getResources().getDrawable(R.mipmap.girl));
         lv_msg.setOnScrollListener(new PauseOnScrollListener(chatAdpter.getImageLoader(),true,true));
     }
 

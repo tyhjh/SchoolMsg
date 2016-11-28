@@ -35,6 +35,7 @@ import myViews.waveNavigation.FlowingView;
 import myViews.waveNavigation.LeftDrawerLayout;
 import myinterface.ShowMenu;
 import publicinfo.MyFunction;
+import publicinfo.MyHttp;
 import publicinfo.UserInfo;
 import service.ChatService;
 
@@ -48,6 +49,8 @@ public class Home extends AppCompatActivity implements ShowMenu{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         MyFunction.setContext(this);
+        MyFunction.setLogout(false);
+        MyHttp.setIpAddress(getString(R.string.ipAddress));
         if(UserInfo.getXmppConnection()==null)
             new Thread(new Runnable() {
                 @Override

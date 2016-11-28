@@ -6,14 +6,12 @@ import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
 
 import org.androidannotations.annotations.AfterTextChange;
 import org.androidannotations.annotations.AfterViews;
@@ -23,10 +21,22 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 
 import api.FormatTools;
 import myViews.CircularAnim;
 import publicinfo.MyFunction;
+import publicinfo.MyHttp;
 import publicinfo.UserInfo;
 import service.ChatService;
 
@@ -34,15 +44,14 @@ import service.ChatService;
 public class Signup extends AppCompatActivity {
     private int count=30;
     private static  boolean CANGETAUTHCODE = true;
+    private static String SCHOOL_NUMBER="10336";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Client client=Client.create();
-        WebResource webResource=client.resource("");
     }
 
     @ViewById
-    EditText etRegisterNumber,etRegisterEmail,etRegisterPassword,etRegisterAuthCode,etRegisterName;
+    EditText etRegisterNumber,etRegisterEmail,etRegisterPassword,etRegisterAuthCode,etRegisterName,etStuNumber;
     @ViewById
     Button btGetAuthCode,btRegister;
     @ViewById
@@ -75,13 +84,28 @@ public class Signup extends AppCompatActivity {
     void register(){
         if(!MyFunction.isIntenet(this))
             return;
+        String stu_number=etStuNumber.getText().toString().trim();
+        String stu_email=etRegisterEmail.getText().toString().trim();
         String number=etRegisterNumber.getText().toString();
         String password=etRegisterPassword.getText().toString();
-        if(!number.equals("")&&!password.equals("")){
-            regs(number,password);
+
+        if(!number.equals("")&&!password.equals("")&&!stu_email.equals("")&&!stu_number.equals("")){
+            //regs(number,password);
+            signup(SCHOOL_NUMBER,stu_number,stu_email,number,password);
         }
 
     }
+
+    @Background
+    void signup(String str1,String str2,String str3,String str4,String str5){
+        String log=MyHttp.Signup(str1,str2,str3,str4,str5);
+        if(log!=null){
+            Snack(log);
+        }else {
+            Toast("注册成功");
+        }
+    }
+
     @Background
     void regs(String name,String pas) {
         if(UserInfo.Register(name,pas,Signup.this)) {

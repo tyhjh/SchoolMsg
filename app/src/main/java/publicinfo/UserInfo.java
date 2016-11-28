@@ -53,22 +53,22 @@ import service.ChatService;
  */
 
 public class UserInfo {
-    private static int SERVER_PORT=5222;
-    private static String SERVER_HOST="120.27.49.173";
-    private static String SERVER_NAME="120.27.49.173";
+    private static int SERVER_PORT = 5222;
+    private static String SERVER_HOST = "120.27.49.173";
+    private static String SERVER_NAME = "120.27.49.173";
 
 
-    public static boolean canDo(){
-        if(xmppConnection!=null&&xmppConnection.isConnected())
+    public static boolean canDo() {
+        if (xmppConnection != null && xmppConnection.isConnected())
             return true;
         else
             return false;
     }
 
-    static{
-        try{
+    static {
+        try {
             Class.forName("org.jivesoftware.smack.ReconnectionManager");
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -81,23 +81,24 @@ public class UserInfo {
     static XMPPConnection xmppConnection;
     // 加入组的名字
     static String groupName;
+
     //
-    private static void setXmppConnection(){
-        try{
+    private static void setXmppConnection() {
+        try {
             Class.forName("org.jivesoftware.smack.ReconnectionManager");
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         XMPPConnection conn;
         ConnectionConfiguration config = new ConnectionConfiguration(
-                SERVER_HOST, SERVER_PORT,SERVER_NAME);
+                SERVER_HOST, SERVER_PORT, SERVER_NAME);
         config.setReconnectionAllowed(true);
         config.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
         config.setSASLAuthenticationEnabled(false);
         conn = new XMPPConnection(config);
         try {
             conn.connect();
-            xmppConnection=conn;
+            xmppConnection = conn;
         } catch (XMPPException e) {
             e.printStackTrace();
         }
@@ -108,23 +109,23 @@ public class UserInfo {
     }
 
     //登陆
-    public static synchronized boolean Login(String name,String pas,Context context){
+    public static synchronized boolean Login(String name, String pas, Context context) {
         try {
-            if(!MyFunction.isIntenet(context,null))
+            if (!MyFunction.isIntenet(context, null))
                 return false;
             setXmppConnection();
-            if(xmppConnection==null||!xmppConnection.isConnected())
+            if (xmppConnection == null || !xmppConnection.isConnected())
                 return false;
             xmppConnection.login(name, pas);
             Presence presence = new Presence(Presence.Type.available);
             xmppConnection.sendPacket(presence);
-            SharedPreferences shared=context.getSharedPreferences("login", Context.MODE_PRIVATE);
+            SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = shared.edit();
-            editor.putString("name",name);
-            editor.putString("pas",pas);
+            editor.putString("name", name);
+            editor.putString("pas", pas);
             editor.commit();
-            UserInfo.id=name;
-            UserInfo.groupName=name+MyFunction.getTime();
+            UserInfo.id = name;
+            UserInfo.groupName = name + MyFunction.getTime();
             return true;
 
         } catch (XMPPException e) {
@@ -134,27 +135,27 @@ public class UserInfo {
     }
 
     //重新连接
-    public static synchronized boolean reLogin(Context context){
+    public static synchronized boolean reLogin(Context context) {
         try {
-            if(!MyFunction.isIntenet(context,null))
+            if (!MyFunction.isIntenet(context, null))
                 return false;
 
-            if(MyFunction.isServiceRun(context,"service.ChatService")){
-                    xmppConnection= ChatService.getConnection();
+            if (MyFunction.isServiceRun(context, "service.ChatService")) {
+                xmppConnection = ChatService.getConnection();
                 return true;
             }
 
-            SharedPreferences shared=context.getSharedPreferences("login", Context.MODE_PRIVATE);
-            UserInfo.id=shared.getString("name",null);
-            UserInfo.groupName=id+MyFunction.getTime();
+            SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
+            UserInfo.id = shared.getString("name", null);
+            UserInfo.groupName = id + MyFunction.getTime();
 
 
-            if(!canDo())
+            if (!canDo())
                 setXmppConnection();
-            if(!canDo())
+            if (!canDo())
                 return false;
 
-            xmppConnection.login(id, shared.getString("pas",null));
+            xmppConnection.login(id, shared.getString("pas", null));
             Presence presence = new Presence(Presence.Type.available);
             xmppConnection.sendPacket(presence);
             return true;
@@ -165,11 +166,11 @@ public class UserInfo {
     }
 
     //注册
-    public static boolean Register(String account,String password,Context context){
-        if(!MyFunction.isIntenet(context,null))
+    public static boolean Register(String account, String password, Context context) {
+        if (!MyFunction.isIntenet(context, null))
             return false;
         setXmppConnection();
-        if(xmppConnection==null)
+        if (xmppConnection == null)
             return false;
         AccountManager manager = new AccountManager(xmppConnection);
         try {
@@ -181,82 +182,82 @@ public class UserInfo {
     }
 
     //退出登录
-    public static void logout(Context context){
+    public static void logout(Context context) {
 
-        SharedPreferences shared=context.getSharedPreferences("login", Context.MODE_PRIVATE);
+        SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
         shared.edit().clear().commit();
 
-        shared=context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
+        shared = context.getSharedPreferences("chat_date", Context.MODE_PRIVATE);
         shared.edit().clear().commit();
 
 
-        if(UserInfo.canDo())
+        if (UserInfo.canDo())
             xmppConnection.disconnect();
         final AVQuery<AVObject> query = new AVQuery<>("Image");
-        query.whereEqualTo("user",UserInfo.getId());
+        query.whereEqualTo("user", UserInfo.getId());
         query.findInBackground(new FindCallback<AVObject>() {
             @Override
             public void done(List<AVObject> list, AVException e) {
-                if(e==null&&list.size()>0){
-                    for(int i=0;i<list.size();i++){
+                if (e == null && list.size() > 0) {
+                    for (int i = 0; i < list.size(); i++) {
                         list.get(i).deleteInBackground();
                     }
                 }
             }
         });
         final AVQuery<AVObject> query1 = new AVQuery<>("Record");
-        query1.whereEqualTo("user",UserInfo.getId());
+        query1.whereEqualTo("user", UserInfo.getId());
         query1.findInBackground(new FindCallback<AVObject>() {
             @Override
             public void done(List<AVObject> list, AVException e) {
-                if(e==null&&list.size()>0){
-                    for(int i=0;i<list.size();i++){
+                if (e == null && list.size() > 0) {
+                    for (int i = 0; i < list.size(); i++) {
                         list.get(i).deleteInBackground();
                     }
                 }
             }
         });
-        Intent intent=new Intent(context, ChatService.class);
+        Intent intent = new Intent(context, ChatService.class);
         context.stopService(intent);
     }
 
     //强制下线
-    public static void logoutFore(Context context){
-        SharedPreferences shared=context.getSharedPreferences("login", Context.MODE_PRIVATE);
+    public static void logoutFore(Context context) {
+        SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = shared.edit();
         editor.clear();
         editor.commit();
-        if(xmppConnection.isConnected())
+        if (xmppConnection.isConnected())
             xmppConnection.disconnect();
-        Intent intent=new Intent(context, ChatService.class);
+        Intent intent = new Intent(context, ChatService.class);
         context.stopService(intent);
     }
 
     //修改密码
-    public static boolean changePassword(Context context,String pwd,String prepas,boolean b) {
-        SharedPreferences shared=context.getSharedPreferences("login", Context.MODE_PRIVATE);
-        String pas=shared.getString("pas",null);
+    public static boolean changePassword(Context context, String pwd, String prepas, boolean b) {
+        SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
+        String pas = shared.getString("pas", null);
         if (!canDo())
             return false;
-        if(b&&pas!=null){
+        if (b && pas != null) {
             try {
                 xmppConnection.getAccountManager().changePassword(pwd);
                 return true;
             } catch (XMPPException e) {
                 return false;
             }
-        }else if(pas!=null){
-            if(pas.equals(prepas)){
+        } else if (pas != null) {
+            if (pas.equals(prepas)) {
                 try {
                     xmppConnection.getAccountManager().changePassword(pwd);
                     return true;
                 } catch (XMPPException e) {
                     return false;
                 }
-            }else
+            } else
                 return false;
         }
-     return false;
+        return false;
     }
 
     //查询用户
@@ -281,13 +282,13 @@ public class UserInfo {
                 row = it.next();
                 user.put("userAccount", row.getValues("userAccount").next()
                         .toString());
-                Log.e("获取的东西",row.getValues("userAccount").next().toString());
+                Log.e("获取的东西", row.getValues("userAccount").next().toString());
                 user.put("userPhote", row.getValues("userPhote").next().toString());
-                Log.e("获取的东西",row.getValues("userPhote").next().toString());
+                Log.e("获取的东西", row.getValues("userPhote").next().toString());
                 results.add(user);
                 // 若存在，则有返回,UserName一定非空，其他两个若是有设，一定非空
             }
-            Log.e("my=没有","哈哈哈哈哈哈哈");
+            Log.e("my=没有", "哈哈哈哈哈哈哈");
         } catch (XMPPException e) {
             e.printStackTrace();
         }
@@ -304,7 +305,7 @@ public class UserInfo {
         } catch (XMPPException e) {
             e.printStackTrace();
         }
-        Log.e("获取的东西",vcard.getNickName());
+        Log.e("获取的东西", vcard.getNickName());
         return vcard;
     }
 
@@ -312,24 +313,24 @@ public class UserInfo {
     public static void addUser(String userName) {
         if (!canDo())
             return;
-        Presence subscription=new Presence(Presence.Type.subscribe);
-        subscription.setTo(userName+"@"+xmppConnection.getServiceName());
+        Presence subscription = new Presence(Presence.Type.subscribe);
+        subscription.setTo(userName + "@" + xmppConnection.getServiceName());
         xmppConnection.sendPacket(subscription);
     }
 
     //同意添加好友并添加对方为好友
-    public static void agreeAdd(String from){
-        if(!canDo())
+    public static void agreeAdd(String from) {
+        if (!canDo())
             return;
-        Presence reSubscription=new Presence(Presence.Type.subscribe);
+        Presence reSubscription = new Presence(Presence.Type.subscribe);
         reSubscription.setTo(from);
-       xmppConnection.sendPacket(reSubscription);
+        xmppConnection.sendPacket(reSubscription);
     }
 
     //获取好友状态
     public int IsUserOnLine(String user) {
-        String url = "http://"+SERVER_HOST+":9090/plugins/presence/status?" +
-                "jid="+ user +"@"+ SERVER_NAME +"&type=xml";
+        String url = "http://" + SERVER_HOST + ":9090/plugins/presence/status?" +
+                "jid=" + user + "@" + SERVER_NAME + "&type=xml";
 //        System.out.println(url);
         int shOnLineState = 0; // 不存在
         try {
@@ -341,7 +342,7 @@ public class UserInfo {
                 if (null != oIn) {
                     String strFlag = oIn.readLine();
                     oIn.close();
-                    System.out.println("strFlag"+strFlag);
+                    System.out.println("strFlag" + strFlag);
                     if (strFlag.indexOf("type=\"unavailable\"") >= 0) {
                         shOnLineState = 2;
                     }
@@ -360,7 +361,7 @@ public class UserInfo {
     }
 
     //设置昵称
-    public static void setNickName(String nickName){
+    public static void setNickName(String nickName) {
         VCard vCard1 = new VCard();
         vCard1.setNickName(nickName);
         try {
@@ -371,12 +372,12 @@ public class UserInfo {
     }
 
     //获取昵称
-    public static String getNickName(String name){
-        if(!canDo())
+    public static String getNickName(String name) {
+        if (!canDo())
             return null;
         VCard vCard = new VCard();
         try {
-            vCard.load(xmppConnection,name+SERVER_HOST);
+            vCard.load(xmppConnection, name + SERVER_HOST);
         } catch (XMPPException e) {
             e.printStackTrace();
             return null;
@@ -386,7 +387,7 @@ public class UserInfo {
 
     //获取用户头像
     public static byte[] getUserImage(String user) {
-        if(!canDo()){
+        if (!canDo()) {
             return null;
         }
         ByteArrayInputStream bais = null;
@@ -395,7 +396,7 @@ public class UserInfo {
             // 加入这句代码，解决No VCard for
             ProviderManager.getInstance().addIQProvider("vCard", "vcard-temp",
                     new org.jivesoftware.smackx.provider.VCardProvider());
-            vcard.load(xmppConnection, user+"@"+xmppConnection.getServiceName());
+            vcard.load(xmppConnection, user + "@" + xmppConnection.getServiceName());
             if (vcard == null || vcard.getAvatar() == null)
                 return null;
             bais = new ByteArrayInputStream(vcard.getAvatar());
@@ -405,7 +406,7 @@ public class UserInfo {
         }
         if (bais == null)
             return null;
-        Drawable drawable=FormatTools.getInstance().InputStream2Drawable(bais);
+        Drawable drawable = FormatTools.getInstance().InputStream2Drawable(bais);
         return getPicture(drawable);
     }
 
@@ -477,9 +478,9 @@ public class UserInfo {
 
     //获取好友列表
     public static List<RosterEntry> getAllEntries() {
-        if(!canDo())
+        if (!canDo())
             return null;
-        Roster roster=xmppConnection.getRoster();
+        Roster roster = xmppConnection.getRoster();
         List<RosterEntry> Entrieslist = new ArrayList<RosterEntry>();
         Collection<RosterEntry> rosterEntry = roster.getEntries();
         Iterator<RosterEntry> i = rosterEntry.iterator();
@@ -500,12 +501,13 @@ public class UserInfo {
         UserInfo.groups = groups;
     }
 
-    public static void addGroup(Group group){
-        if(!groups.contains(group)) groups.add(group);}
+    public static void addGroup(Group group) {
+        if (!groups.contains(group)) groups.add(group);
+    }
 
-    public static void deleteGroup(Group group){
-        if(groups.contains(group))
-        groups.remove(group);
+    public static void deleteGroup(Group group) {
+        if (groups.contains(group))
+            groups.remove(group);
     }
 
     public static String getName() {
@@ -526,14 +528,14 @@ public class UserInfo {
 
     //将drawable转换成可以用来存储的byte[]类型
     public static byte[] getPicture(Drawable drawable) {
-             if(drawable == null) {
-                        return null;
-                     }
-               BitmapDrawable bd = (BitmapDrawable) drawable;
-             Bitmap bitmap = bd.getBitmap();
-             ByteArrayOutputStream os = new ByteArrayOutputStream();
-                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
-                 return os.toByteArray();
-            }
+        if (drawable == null) {
+            return null;
+        }
+        BitmapDrawable bd = (BitmapDrawable) drawable;
+        Bitmap bitmap = bd.getBitmap();
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+        return os.toByteArray();
+    }
 
 }

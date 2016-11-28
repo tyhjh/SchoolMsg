@@ -48,9 +48,6 @@ public class Login extends AppCompatActivity {
         if(shared!=null&&shared.getString("name",null)!=null){
             starActivity();
             this.finish();
-        }else {
-            List<Group> groups=new ArrayList<Group>();
-            new SharedData(this).savaGrops(groups);
         }
     }
 

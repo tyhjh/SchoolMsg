@@ -98,7 +98,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
     Uri imageUri;
     ContentResolver contentResolver;
     String date;
-    boolean isBigPicture;
+    boolean isBigPicture=false;
     AudioRecoderUtils mAudioRecoderUtils;
     ImageView mImageView;
     TextView mTextView;
@@ -758,8 +758,8 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
                 public void done(AVException e) {
                     if (e == null) {
                         File file1=new File(fileName);
-                        if(file1.exists())
-                            file1.delete();
+                        /*if(file1.exists())
+                            file1.delete();*/
                         getImageUrl(PrelandPath,name);
                     } else {
                         Toast.makeText(SendMessage.this, e.getMessage(),Toast.LENGTH_SHORT).show();

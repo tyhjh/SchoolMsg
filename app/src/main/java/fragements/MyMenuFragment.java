@@ -86,13 +86,12 @@ public class MyMenuFragment extends MenuFragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(MyFunction.isRegister()&&UserInfo.getId().equals(MyFunction.getRegisterId())) {
-                    handler.sendEmptyMessage(2);
-                    MyFunction.setRegister(false);
-                }else
-                    drawable = FormatTools.getInstance().Bytes2Drawable(UserInfo.getUserImage(UserInfo.getId()));
+
+                drawable = FormatTools.getInstance().Bytes2Drawable(UserInfo.getUserImage(UserInfo.getId()));
                 if (drawable != null)
                     handler.sendEmptyMessage(1);
+                else
+                    handler.sendEmptyMessage(2);
             }
         }).start();
     }
@@ -119,12 +118,14 @@ public class MyMenuFragment extends MenuFragment {
                       Toast.makeText(getActivity(),getString(R.string.share), Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.menu_logout:
+                        MyFunction.setLogout(true);
                         UserInfo.logout(getActivity());
                         CircularAnim.fullActivity(getActivity(), view)
 //                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
                                 .go(new CircularAnim.OnAnimationEndListener() {
                                     @Override
                                     public void onAnimationEnd() {
+
                                         startActivity(new Intent(getActivity(), Login_.class));
                                         getActivity().finish();
                                     }

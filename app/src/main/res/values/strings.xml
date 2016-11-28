@@ -21,6 +21,8 @@
     <string name="savaphotopath">/ASchollMsg</string>
     <string name="imageFormat">.JPEG</string>
 
+    <string name="ipAddress">http://120.27.49.173:8080</string>
+
     <array name="colors_1">
         <item>#fc0</item>
         <item>#fc0</item>

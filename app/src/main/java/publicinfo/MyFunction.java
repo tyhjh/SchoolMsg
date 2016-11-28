@@ -62,6 +62,8 @@ import java.util.regex.Pattern;
 
 public class MyFunction {
 
+    private static boolean isLogout;
+
     private static boolean register;
 
     private static String registerName;
@@ -76,7 +78,7 @@ public class MyFunction {
         MyFunction.registerId = registerId;
     }
 
-    private static int IMAGE_SIZE=300;
+    private static int IMAGE_SIZE=10;
 
     private static boolean reConnect;
 
@@ -107,6 +109,14 @@ public class MyFunction {
         for(int i=0;i<pictureList.size();i++){
             pictureList.get(i).setCheckable(0);
         }
+    }
+
+    public static boolean isLogout() {
+        return isLogout;
+    }
+
+    public static void setLogout(boolean logout) {
+        isLogout = logout;
     }
 
     public static boolean isReConnect() {
@@ -526,6 +536,10 @@ public class MyFunction {
         Log.d("ANDROID_LAB", "pauseMusic bMute="+bMute +" result="+bool);
         return bool;
     }
+
+    //post-jersey
+
+
 
 
     public static void  savaFile(String url, String name, Handler handler, Context context){

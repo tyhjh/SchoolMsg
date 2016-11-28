@@ -419,6 +419,7 @@ public class ChatService extends Service {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                if(UserInfo.getMyGroups()!=null)
                 for(int i=0;i<UserInfo.getMyGroups().size();i++){
                     if(!list.contains(UserInfo.getMyGroups().get(i)))
                         list.add(UserInfo.getMyGroups().get(i));

@@ -155,7 +155,10 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
                 viewHolder.text.setText(msg_chat.getText());
             } else if (msg_chat.getType() == 1) {
                 viewHolder.text.setVisibility(View.GONE);
-                imageLoader.displayImage(msg_chat.getText(), viewHolder.image, MyFunction.getOption());
+                Picasso.with(getContext()).load(msg_chat.getText()).into(viewHolder.image);
+                //imageLoader.displayImage(msg_chat.getText(), viewHolder.image, MyFunction.getOption());
+
+
                 viewHolder.image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

@@ -49,6 +49,7 @@ import myViews.CircleRefreshLayout;
 import myViews.SharedData;
 import myinterface.ShowMenu;
 import publicinfo.Group;
+import publicinfo.MyFunction;
 import publicinfo.UserInfo;
 import service.ChatService;
 
@@ -311,7 +312,8 @@ public class Chat extends Fragment {
 
     @Override
     public void onDestroy() {
-        ChatService.savaDate(groups);
+        if(!MyFunction.isLogout())
+            ChatService.savaDate(groups);
         getActivity().unregisterReceiver(msgBoradCastReceiver);
         super.onDestroy();
     }
