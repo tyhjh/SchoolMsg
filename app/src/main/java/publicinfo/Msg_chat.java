@@ -13,7 +13,7 @@ public class Msg_chat implements Serializable {
     String name;
     String text;
     String imageUrl;
-    String headImageUrl;
+    byte[] headImageUrl;
     public String getName() {
         return name;
     }
@@ -30,7 +30,7 @@ public class Msg_chat implements Serializable {
         this.time = time;
     }
 
-    public Msg_chat(int who, int type, int status, String text, String imageUrl, String headImageUrl, String name, int time) {
+    public Msg_chat(int who, int type, int status, String text, String imageUrl, byte[] headImageUrl, String name, int time) {
         this.who = who;
         this.type = type;
         this.status = status;
@@ -41,11 +41,11 @@ public class Msg_chat implements Serializable {
         this.time=time;
     }
 
-    public String getHeadImageUrl() {
+    public byte[] getHeadImageUrl() {
         return headImageUrl;
     }
 
-    public void setHeadImageUrl(String headImageUrl) {
+    public void setHeadImageUrl(byte[] headImageUrl) {
         this.headImageUrl = headImageUrl;
     }
 

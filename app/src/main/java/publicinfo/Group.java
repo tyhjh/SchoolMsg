@@ -63,7 +63,7 @@ public class Group implements Serializable {
     @Override
     public boolean equals(Object obj) {
         if(obj instanceof Group){
-            return this.getGroupName().equals(((Group) obj).getGroupName());
+            return this.getId().equals(((Group) obj).getId());
         }
         return super.equals(obj);
     }

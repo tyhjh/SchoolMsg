@@ -157,7 +157,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
 
             }
         });
-        MyFunction.setChatName(group.getGroupName());
+        MyFunction.setChatName(group.getId());
         imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
         MyFunction.initPictures();
         saveup.setAnimationListener(new Animation.AnimationListener() {
@@ -241,7 +241,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        MyFunction.savaFile(msg_chat.getText(),group.getGroupName()+MyFunction.getTime()+getString(R.string.imageFormat),handler,SendMessage.this);
+                        MyFunction.savaFile(msg_chat.getText(),group.getId()+MyFunction.getTime()+getString(R.string.imageFormat),handler,SendMessage.this);
                     }
                 }).start();
             }
@@ -311,7 +311,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
 
     @Click(R.id.iv_back)
     void back(){
-        ChatService.savaDate(chatAdpter.getMsg_chats(),group.getGroupName());
+        ChatService.savaDate(chatAdpter.getMsg_chats(),group.getId());
         MyFunction.setChatName(null);
         unregisterReceiver(msgBoradCastReceiver);
         this.finish();
@@ -337,7 +337,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
             MyTime myTime = new MyTime();
             String time=myTime.getYear() + myTime.getMonth_() + myTime.getDays() +
                     myTime.getWeek_() + myTime.getHour() + myTime.getMinute() +
-                    myTime.getSecond() +i+ group.getGroupName() + ".JPEG";
+                    myTime.getSecond() +i+ group.getId() + ".JPEG";
             if(isBigPicture){
                 try {
                     //复制图片
@@ -356,7 +356,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
     }
 
     //显示发送的消息
-    private void initSendMsg(String Url,int type,String path) {
+    private void initSendMsg(final String Url, final int type, String path) {
         if(Url==null||Url.equals(""))
             return;
         String time;
@@ -371,12 +371,18 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
         et_text_send.setText("");
         if (!group.getId().equals(UserInfo.getGroupId())) {
                 chatmanager=UserInfo.getXmppConnection().getChatManager();
-            Chat newChat = chatmanager.createChat(group.getGroupName() + "@120.27.49.173",null);
+            Chat newChat = chatmanager.createChat(group.getId() + "@120.27.49.173",null);
             sendText(Url, newChat,type);
         } else {
             try {
+                Log.e("已发送","xxxxxx");
                 //MyFunction.getMultiUserChat().sendMessage(Url + type);
-                MyHttp.SendMessage(UserInfo.getId(),UserInfo.getGroupId(),Url+type);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MyHttp.SendMessage(UserInfo.getId(),UserInfo.getGroupId(),Url+type+"size"+time_Long);
+                    }
+                }).start();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -451,14 +457,14 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
 
     //初始化消息列表
     private void initListView() {
-        msg_chatList=new SharedData(SendMessage.this).getData(group.getGroupName());
+        msg_chatList=new SharedData(SendMessage.this).getData(group.getId());
         if(msg_chatList==null) {
             msg_chatList = new ArrayList<Msg_chat>();
         }
         setMsgStatus();
         chatAdpter=new ChatAdpter(SendMessage.this,0,msg_chatList);
         lv_msg.setAdapter(chatAdpter);
-        tv_name.setText(group.getGroupName());
+        tv_name.setText(group.getId());
         iv_heagImage.setClipToOutline(true);
         iv_heagImage.setOutlineProvider(MyFunction.getOutline(true,10,0));
         if(group.getDrawable()==null)
@@ -467,7 +473,6 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
             iv_heagImage.setImageDrawable(FormatTools.getInstance().Bytes2Drawable(group.getDrawable()));
         lv_msg.setSelection(chatAdpter.getCount()-1);
         //单人聊天的头像
-        chatAdpter.setHeadImage(FormatTools.getInstance().Bytes2Drawable(group.getDrawable()));
         lv_msg.setOnScrollListener(new PauseOnScrollListener(chatAdpter.getImageLoader(),true,true));
     }
 
@@ -617,7 +622,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
         MyTime myTime = new MyTime();
         date = myTime.getYear() + myTime.getMonth_() + myTime.getDays() +
                 myTime.getWeek_() + myTime.getHour() + myTime.getMinute() +
-                myTime.getSecond() + group.getGroupName() + ".JPEG";
+                myTime.getSecond() + group.getId() + ".JPEG";
     }
     @Override
     public void onBackPressed() {
@@ -628,7 +633,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
             return;
         }
 
-        ChatService.savaDate(chatAdpter.getMsg_chats(),group.getGroupName());
+        ChatService.savaDate(chatAdpter.getMsg_chats(),group.getId());
         MyFunction.setChatName(null);
         unregisterReceiver(msgBoradCastReceiver);
         super.onBackPressed();
@@ -694,7 +699,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
                         AVObject avObject = new AVObject("Image");
                         final AVFile file = AVFile.withAbsoluteLocalPath("chat.JPEG", fileName);
                         avObject.put("image", file);
-                        avObject.put("name", group.getGroupName()+ date);
+                        avObject.put("name", group.getId()+ date);
                         avObject.saveInBackground(new SaveCallback() {
                             @Override
                             public void done(AVException e) {
@@ -718,7 +723,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
     //获取图片URl
     public void getImageUrl(final String path,String name) {
         AVQuery<AVObject> query = new AVQuery<>("Image");
-        query.whereEqualTo("name", group.getGroupName() + name);
+        query.whereEqualTo("name", group.getId() + name);
         query.getFirstInBackground(new GetCallback<AVObject>() {
             @Override
             public void done(AVObject avObject, AVException e) {
@@ -756,7 +761,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
             final AVFile file = AVFile.withAbsoluteLocalPath("chat.JPEG", fileName);
             avObject.put("image", file);
             avObject.put("user",UserInfo.getId());
-            avObject.put("name", group.getGroupName()+ name);
+            avObject.put("name", group.getId()+ name);
             avObject.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(AVException e) {

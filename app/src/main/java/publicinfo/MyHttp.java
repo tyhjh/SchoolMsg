@@ -87,7 +87,6 @@ public class MyHttp {
     }
 
 
-
     //获取信息
     public static JSONObject getJson(String data, String url, String way) {
         HttpURLConnection conn = null;

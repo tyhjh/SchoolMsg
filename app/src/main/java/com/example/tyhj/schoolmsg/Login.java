@@ -101,8 +101,6 @@ public class Login extends AppCompatActivity {
 
     @Click(R.id.btLogin)
     void login(){
-        List<Group> groups=new ArrayList<Group>();
-        new SharedData(this).savaGrops(groups);
         String name,pas;
         name="10336"+etUserNumber.getText().toString();
         pas=etUserPassord.getText().toString();

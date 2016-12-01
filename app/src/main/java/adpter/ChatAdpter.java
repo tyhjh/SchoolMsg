@@ -27,6 +27,7 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.List;
 
+import api.FormatTools;
 import myViews.CircularAnim;
 import myinterface.ExpendImage;
 import publicinfo.Msg_chat;
@@ -39,7 +40,6 @@ import static android.content.ContentValues.TAG;
  */
 
 public class ChatAdpter extends ArrayAdapter<Msg_chat> {
-    Drawable headImage;
     List<Msg_chat> msg_chats;
     ImageLoader imageLoader;
     private ExpendImage expendImage;
@@ -52,14 +52,6 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
 
     public ImageLoader getImageLoader() {
         return imageLoader;
-    }
-
-    public Drawable getHeadImage() {
-        return headImage;
-    }
-
-    public void setHeadImage(Drawable headImage) {
-        this.headImage = headImage;
     }
 
     @NonNull
@@ -149,7 +141,7 @@ public class ChatAdpter extends ArrayAdapter<Msg_chat> {
             viewHolder.headImage = (ImageView) view.findViewById(R.id.iv_yourheadImage);
             viewHolder.headImage.setClipToOutline(true);
             viewHolder.headImage.setOutlineProvider(MyFunction.getOutline(true, 10, 0));
-            viewHolder.headImage.setImageDrawable(getHeadImage());
+            viewHolder.headImage.setImageBitmap(FormatTools.getInstance().Bytes2Bitmap(msg_chat.getHeadImageUrl()));
             viewHolder.progressBar = (SimpleArcLoader) view.findViewById(R.id.progressBar);
             if (msg_chat.getType() == 0) {
                 viewHolder.text.setText(msg_chat.getText());

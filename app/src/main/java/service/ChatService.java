@@ -23,6 +23,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.example.tyhj.schoolmsg.Application;
 import com.example.tyhj.schoolmsg.Login_;
 import com.example.tyhj.schoolmsg.R;
@@ -41,6 +42,8 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,6 +57,7 @@ import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
 import publicinfo.Picture;
 import publicinfo.UserInfo;
+import redis.clients.jedis.Jedis;
 
 public class ChatService extends Service {
 
@@ -96,12 +100,13 @@ public class ChatService extends Service {
         ImageLoader.getInstance().init(configuration);
         //获取最近图片
         getPhotos();
+        //连接状况监听
         if (UserInfo.canDo()) {
             xmppConnection.addConnectionListener(connectionListener);
         }
 
-        //设置好友申请监听
-        addSubscriptionListener();
+        //设置单人聊天监听
+            addSubscriptionListener();
             if(UserInfo.canDo())
             xmppConnection.getChatManager().addChatListener(new ChatManagerListener() {
             @Override
@@ -109,15 +114,30 @@ public class ChatService extends Service {
                 chat.addMessageListener(new MessageListener() {
                     @Override
                     public void processMessage(Chat chat, Message message) {
-                        sendBroadCast(message,"@120.27.49.173");
+                        Log.e("单聊",message.getBody());
+                        sendBroadCast(message,"@120.27.49.173",null);
                     }
                 });
             }
         });
 
-        MultiUserChat multiUserChat = new ChatRoom(xmppConnection).joinMultiUserChat(UserInfo.getGroupName(),"111","111");
-        MyFunction.setMultiUserChat(multiUserChat);
-        if(UserInfo.canDo())
+        //接收群聊消息
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //Jedis jedis = JedisPoolTool.getInstance().getJedis();
+                Jedis jedis = new Jedis("120.27.49.173",6380);
+                jedis.auth("zx349766");
+                jedis.subscribe(listenner, UserInfo.getGroupId());
+            }
+        }).start();
+
+
+
+
+        //MultiUserChat multiUserChat = new ChatRoom(xmppConnection).joinMultiUserChat(UserInfo.getGroupName(),"111","111");
+        //MyFunction.setMultiUserChat(multiUserChat);
+        /*if(UserInfo.canDo())
         multiUserChat.addMessageListener(new PacketListener() {
             @Override
             public void processPacket(Packet packet) {
@@ -127,7 +147,7 @@ public class ChatService extends Service {
                 if(!message.getFrom().equals("111@conference.120.27.49.173/"+UserInfo.getGroupName()))
                 sendBroadCast(message,"@conference.120.27.49.173");
             }
-        });
+        });*/
     }
 
     @Override
@@ -190,7 +210,6 @@ public class ChatService extends Service {
     private Runnable getRun(){
         if(UserInfo.canDo())
         runnable = new Runnable() {
-
             @Override
             public void run() {
                 // 每一分钟发送一次包,确保连接
@@ -273,8 +292,8 @@ public class ChatService extends Service {
         MyFunction.setPictureList(pictures);
     }
 
-    //发送广播
-    public void sendBroadCast(Message message,String divi) {
+    //获取到消息后发送广播
+    public void sendBroadCast(Message message,String divi,String from) {
         Application.setCount(Application.getCount()+1);
         String body=message.getBody();
         String str=body.substring(0,body.lastIndexOf("size"));
@@ -282,7 +301,15 @@ public class ChatService extends Service {
         int type=Integer.parseInt(str.substring(str.length()-1,str.length()));
         String messageBody = str.substring(0,str.length()-1);
         String messageFrom=message.getFrom().substring(0,message.getFrom().lastIndexOf(divi));
-        Msg_chat msg_chat=new Msg_chat(2,type,0,messageBody,count,null,messageFrom, MyFunction.getTime());
+        Msg_chat msg_chat;
+        byte[] drawable = null;
+        if(from!=null) {
+            drawable= UserInfo.getUserImage(from);
+            msg_chat = new Msg_chat(2, type, 0, messageBody, count, drawable, from, MyFunction.getTime());
+        } else {
+            drawable= UserInfo.getUserImage(messageFrom);
+            msg_chat = new Msg_chat(2, type, 0, messageBody, count, drawable, messageFrom, MyFunction.getTime());
+        }
 
         if(!Application.getIsLeave()){
             if(type==0)
@@ -314,6 +341,7 @@ public class ChatService extends Service {
         Intent intent=new Intent("boradcast.action.GETMESSAGE2");
         intent.putExtra("msgFrom",messageFrom);
         sendBroadcast(intent);
+        //Log.e("群聊的广播","已发送");
     }
     //通知栏配置
     private void notificationBar(String name,String text,int count){
@@ -412,6 +440,24 @@ public class ChatService extends Service {
             Intent intent=new Intent("boradcast.action.FRIENDAPPLY");
             intent.putExtra("friendApply",messageFrom);
             sendBroadcast(intent);
+        }
+    };
+    //监听群聊事件
+    RedisPubListenner listenner = new RedisPubListenner(){
+        @Override
+        public void onMessage(String channel, String message) {
+            super.onMessage(channel, message);
+            try {
+                JSONObject jsonObject=new JSONObject(message);
+                Message msg=new Message();
+                msg.setBody(jsonObject.getString("content"));
+                msg.setFrom(jsonObject.getString("groupid")+"@120.27.49.173");
+                if(!jsonObject.getString("userid").equals(UserInfo.getId())) {
+                    sendBroadCast(msg, "@120.27.49.173",jsonObject.getString("userid"));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     };
 

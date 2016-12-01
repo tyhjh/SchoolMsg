@@ -219,7 +219,8 @@ public class Chat extends Fragment {
         groups = new ArrayList<Group>();
         groups_land = new ArrayList<Group>();
         addLandGroup();
-        groups.add(new Group(UserInfo.getGroupId(),"班群",0,null));
+        if(!groups.contains(new Group(UserInfo.getGroupId(),"班群",0,null)))
+            groups.add(new Group(UserInfo.getGroupId(),"班群",0,null));
         groupAdapter_land = new GroupAdapter(getActivity(), groups_land);
         groupAdapter = new GroupAdapter(getActivity(), groups);
         rcly_find_land.setAdapter(groupAdapter_land);

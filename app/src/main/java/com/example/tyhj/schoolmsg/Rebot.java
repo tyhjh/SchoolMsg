@@ -134,7 +134,6 @@ public class Rebot extends AppCompatActivity {
         }
         lv_msg.setSelection(chatAdpter.getCount()-1);
         //单人聊天的头像
-        chatAdpter.setHeadImage(getResources().getDrawable(R.mipmap.girl));
         lv_msg.setOnScrollListener(new PauseOnScrollListener(chatAdpter.getImageLoader(),true,true));
     }
 
