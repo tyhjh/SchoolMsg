@@ -91,7 +91,6 @@ public class GroupAdapter extends SwipeMenuAdapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder1, int position) {
 
-
         if(holder1 instanceof GroupHolder){
             final GroupHolder holder=(GroupHolder) holder1;
             final Group group = groups.get(holder.getPosition());
@@ -197,7 +196,6 @@ public class GroupAdapter extends SwipeMenuAdapter<RecyclerView.ViewHolder> {
     }
 
     @Override
-
     public int getItemViewType(int position) {
         if(groups.get(position).getIsgroup()==0)
             return 0;

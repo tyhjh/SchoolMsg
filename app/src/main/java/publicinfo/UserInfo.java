@@ -56,6 +56,9 @@ public class UserInfo {
     private static int SERVER_PORT = 5222;
     private static String SERVER_HOST = "120.27.49.173";
     private static String SERVER_NAME = "120.27.49.173";
+    private static String groupId;
+
+
 
 
     public static boolean canDo() {
@@ -119,6 +122,8 @@ public class UserInfo {
             xmppConnection.login(name, pas);
             Presence presence = new Presence(Presence.Type.available);
             xmppConnection.sendPacket(presence);
+            if(!MyHttp.getStuGroup())
+                return false;
             SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = shared.edit();
             editor.putString("name", name);
@@ -127,7 +132,6 @@ public class UserInfo {
             UserInfo.id = name;
             UserInfo.groupName = name + MyFunction.getTime();
             return true;
-
         } catch (XMPPException e) {
             e.printStackTrace();
         }
@@ -155,9 +159,12 @@ public class UserInfo {
             if (!canDo())
                 return false;
 
+
             xmppConnection.login(id, shared.getString("pas", null));
             Presence presence = new Presence(Presence.Type.available);
             xmppConnection.sendPacket(presence);
+            if(!MyHttp.getStuGroup())
+                return false;
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -518,6 +525,8 @@ public class UserInfo {
         return id;
     }
 
+    public static void setId(String id){UserInfo.id=id;}
+
     public static XMPPConnection getXmppConnection() {
         return xmppConnection;
     }
@@ -538,4 +547,11 @@ public class UserInfo {
         return os.toByteArray();
     }
 
+    public static String getGroupId() {
+        return groupId;
+    }
+
+    public static void setGroupId(String groupId) {
+        UserInfo.groupId = groupId;
+    }
 }

@@ -35,6 +35,7 @@ import myViews.CircularAnim;
 import myViews.SharedData;
 import publicinfo.Group;
 import publicinfo.MyFunction;
+import publicinfo.MyHttp;
 import publicinfo.UserInfo;
 import service.ChatService;
 
@@ -103,8 +104,9 @@ public class Login extends AppCompatActivity {
         List<Group> groups=new ArrayList<Group>();
         new SharedData(this).savaGrops(groups);
         String name,pas;
-        name=etUserNumber.getText().toString();
+        name="10336"+etUserNumber.getText().toString();
         pas=etUserPassord.getText().toString();
+        UserInfo.setId(name);
         log(name,pas);
     }
 

@@ -213,7 +213,4 @@ public class Home extends AppCompatActivity implements ShowMenu{
             }
         }
     }
-
-
-
 }

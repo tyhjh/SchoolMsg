@@ -17,11 +17,6 @@ public class StudentInfo {
         this.id=id;
     }
 
-    public static void setStudent(){
-
-    }
-
-
     public static String getStu_num() {
         return stu_num;
     }

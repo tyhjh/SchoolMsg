@@ -36,7 +36,7 @@ public class MyHttp {
                 + "&st_pwd=" + sch_stu_pas
                 + "&phone=" + phone
                 + "&pwd=" + stu_pas;
-        JSONObject jsonObject = getJson(date, url, "POST",UserInfo.getId());
+        JSONObject jsonObject = getJson(date, url, "POST");
         try {
             if (jsonObject != null) {
                 if (jsonObject.getInt("code") == 200)
@@ -53,11 +53,11 @@ public class MyHttp {
 
     //发送消息
     public static String SendMessage(String userid,String groupid,String content){
-        String url = ipAddress + "/messages/push";
+        String url = ipAddress +"/v1.0/users/"+ userid+"/messages/push";
         String data="userid="+userid
                 +"&groupid="+groupid
                 +"&content="+content;
-        JSONObject jsonObject=getJson(data,url,"POST",UserInfo.getId());
+        JSONObject jsonObject=getJson(data,url,"POST");
         try {
             if (jsonObject != null) {
                 if (jsonObject.getInt("code") == 200)
@@ -71,22 +71,38 @@ public class MyHttp {
         return "失败";
     }
 
-    //
+    //获取用户所在群组
+    public static boolean getStuGroup(){
+        String url=ipAddress+"/v1.0/users/"+UserInfo.getId()+"/group";
+        JSONObject jsonObject=getJson(null,url,"GET");
+        try {
+            if(jsonObject!=null&&jsonObject.getInt("code")==200){
+                UserInfo.setGroupId(jsonObject.getJSONObject("data").getString("group"));
+                return true;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 
 
     //获取信息
-    public static JSONObject getJson(String data, String url, String way,String uerid) {
+    public static JSONObject getJson(String data, String url, String way) {
         HttpURLConnection conn = null;
         URL mURL = null;
         if (way.equals("GET")) {
             try {
-                mURL = new URL(url + "?" + data);
+                if(data==null)
+                    mURL = new URL(url);
+                else
+                    mURL = new URL(url + "?" + data);
                 conn = (HttpURLConnection) mURL.openConnection();
                 conn.addRequestProperty("Nonce", "123");
                 conn.addRequestProperty("Timestamp", "1477985732446");
-                conn.addRequestProperty("Userid", uerid);
-                conn.addRequestProperty("Signature", "744C2B5464CDF7BA9BAF81C78CBD350E7F31BA24");
+                conn.addRequestProperty("Userid", UserInfo.getId());
+                conn.addRequestProperty("Signature", new SHA1().getDigestOfString(("1231477985732446"+UserInfo.getId()).getBytes()));
                 conn.setRequestMethod("GET");
                 conn.setReadTimeout(5000);
                 conn.setConnectTimeout(30000);
@@ -107,8 +123,8 @@ public class MyHttp {
                 conn = (HttpURLConnection) mURL.openConnection();
                 conn.addRequestProperty("Nonce", "123");
                 conn.addRequestProperty("Timestamp", "1477985732446");
-                conn.addRequestProperty("Userid", "1033614108438");
-                conn.addRequestProperty("Signature", "744C2B5464CDF7BA9BAF81C78CBD350E7F31BA24");
+                conn.addRequestProperty("Userid", UserInfo.getId());
+                conn.addRequestProperty("Signature", new SHA1().getDigestOfString(("1231477985732446"+UserInfo.getId()).getBytes()));
                 //conn.addRequestProperty("头","我就是头");
                 conn.setRequestMethod("POST");
                 conn.setReadTimeout(5000);

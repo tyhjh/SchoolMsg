@@ -75,6 +75,7 @@ import myinterface.sendPicture;
 import publicinfo.Group;
 import publicinfo.Msg_chat;
 import publicinfo.MyFunction;
+import publicinfo.MyHttp;
 import publicinfo.Picture;
 import publicinfo.UserInfo;
 import service.ChatService;
@@ -120,6 +121,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
         signBroadCast();
         contentResolver = getContentResolver();
         group= (Group) this.getIntent().getSerializableExtra("group");
+
         StatusBarUtil.setColor(this, Color.parseColor("#00000000"));
         addpicture=AnimationUtils.loadAnimation(this,R.anim.addpicture);
         overadd=AnimationUtils.loadAnimation(this,R.anim.addpictureover);
@@ -367,14 +369,15 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
         }
         chatAdpter.add(new Msg_chat(1, type, -1, Url, path, null, "tyhj", MyFunction.getTime()));
         et_text_send.setText("");
-        if (group.getIsgroup() == 0) {
+        if (!group.getId().equals(UserInfo.getGroupId())) {
                 chatmanager=UserInfo.getXmppConnection().getChatManager();
             Chat newChat = chatmanager.createChat(group.getGroupName() + "@120.27.49.173",null);
             sendText(Url, newChat,type);
         } else {
             try {
-                MyFunction.getMultiUserChat().sendMessage(Url + type);
-            } catch (XMPPException e) {
+                //MyFunction.getMultiUserChat().sendMessage(Url + type);
+                MyHttp.SendMessage(UserInfo.getId(),UserInfo.getGroupId(),Url+type);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -405,6 +408,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
     public void sendText(String text, Chat newChat,int type)  {
         try {
             newChat.sendMessage(text+type+"size"+time_Long);
+
         } catch (XMPPException e) {
             e.printStackTrace();
         }

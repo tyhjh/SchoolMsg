@@ -219,6 +219,7 @@ public class Chat extends Fragment {
         groups = new ArrayList<Group>();
         groups_land = new ArrayList<Group>();
         addLandGroup();
+        groups.add(new Group(UserInfo.getGroupId(),"班群",0,null));
         groupAdapter_land = new GroupAdapter(getActivity(), groups_land);
         groupAdapter = new GroupAdapter(getActivity(), groups);
         rcly_find_land.setAdapter(groupAdapter_land);
@@ -276,7 +277,8 @@ public class Chat extends Fragment {
         List<Group> groupList = new SharedData(getActivity()).getGroups();
         if (groupList != null) {
             for (int i = 0; i < groupList.size(); i++) {
-                    groups.add(groupList.get(i));
+                    if(!groups.contains(groupList.get(i)))
+                        groups.add(groupList.get(i));
             }
             Log.e("xxxxxxxxxxx",groupList.size()+"本地xxx");
         }

@@ -91,6 +91,7 @@ public class Signup extends AppCompatActivity {
 
         if(!number.equals("")&&!password.equals("")&&!stu_email.equals("")&&!stu_number.equals("")){
             //regs(number,password);
+            UserInfo.setId("10336"+stu_number);
             signup(SCHOOL_NUMBER,stu_number,stu_email,number,password);
         }
 

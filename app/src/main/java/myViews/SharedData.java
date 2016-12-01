@@ -84,7 +84,7 @@ public  class SharedData {
             SharedPreferences.Editor editor = shared.edit();
             editor.putString(UserInfo.getId(), oAuth_Base64);
             editor.commit();
-            Log.e("xxxxxxxx","执行完了");
+            //Log.e("xxxxxxxx","执行完了");
         } catch (Exception e) {
             e.printStackTrace();
         }
