@@ -318,7 +318,7 @@ public class MyFunction {
             e.printStackTrace();
         }
     }
-//图片压缩
+    //图片压缩
     public static void ImgCompress(String filePath,File newFile,int x,int y,int size) {
         int imageMg=100;
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -361,7 +361,6 @@ public class MyFunction {
         }
         return inSampleSize;
     }
-
     //文件复制
     public static void copyFile(File source, File dest) throws IOException {
         FileChannel inputChannel = null;
@@ -375,7 +374,7 @@ public class MyFunction {
             outputChannel.close();
         }
     }
-//判断 服务 是否运行
+    //判断 服务 是否运行
     public static boolean isServiceRun(Context mContext, String className) {
         boolean isRun = false;
         ActivityManager activityManager = (ActivityManager) mContext
@@ -391,6 +390,9 @@ public class MyFunction {
         }
         return isRun;
     }
+
+
+
 
     public static int[] calculatePopWindowPos(final View anchorView, final View contentView) {
         final int windowPos[] = new int[2];

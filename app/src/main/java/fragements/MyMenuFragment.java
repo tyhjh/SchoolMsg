@@ -39,6 +39,7 @@ import myViews.CircularAnim;
 import myViews.waveNavigation.MenuFragment;
 import publicinfo.MyFunction;
 import publicinfo.UserInfo;
+import twoCode.activity.CaptureActivity;
 
 import static android.content.Intent.ACTION_GET_CONTENT;
 
@@ -121,11 +122,9 @@ public class MyMenuFragment extends MenuFragment {
                         MyFunction.setLogout(true);
                         UserInfo.logout(getActivity());
                         CircularAnim.fullActivity(getActivity(), view)
-//                        .colorOrImageRes(R.color.colorPrimary)  //注释掉，因为该颜色已经在App.class 里配置为默认色
                                 .go(new CircularAnim.OnAnimationEndListener() {
                                     @Override
                                     public void onAnimationEnd() {
-
                                         startActivity(new Intent(getActivity(), Login_.class));
                                         getActivity().finish();
                                     }
@@ -133,6 +132,9 @@ public class MyMenuFragment extends MenuFragment {
                         break;
                     case R.id.menu_about:
                         //删除数据
+                        break;
+                    case R.id.menu_twocode:
+                        startActivity(new Intent(getContext(), CaptureActivity.class));
                         break;
                 }
                 return false;

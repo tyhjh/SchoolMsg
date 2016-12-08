@@ -170,4 +170,26 @@ public class MyHttp {
         os.close();
         return state;
     }
+
+
+    //扫描二维码登录
+    public static String twoCode(String code){
+        String url=code;
+        String action="login";
+        String userid=UserInfo.getId();
+        String date="action="+action+"&userid="+userid;
+        JSONObject jsonObject=getJson(date,url,"POST");
+        try {
+            if(jsonObject!=null&&jsonObject.getInt("code")==200)
+                return null;
+            else if(jsonObject!=null)
+                return jsonObject.getString("msg");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "出错";
+        }
+        return "出错";
+    }
+
 }
+
