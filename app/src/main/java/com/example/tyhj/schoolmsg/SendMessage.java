@@ -57,6 +57,8 @@ import org.androidannotations.annotations.ViewById;
 import org.jivesoftware.smack.Chat;
 import org.jivesoftware.smack.ChatManager;
 import org.jivesoftware.smack.XMPPException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -375,12 +377,10 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
             sendText(Url, newChat,type);
         } else {
             try {
-                Log.e("已发送","xxxxxx");
-                //MyFunction.getMultiUserChat().sendMessage(Url + type);
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        MyHttp.SendMessage(UserInfo.getId(),UserInfo.getGroupId(),Url+type+"size"+time_Long);
+                        MyHttp.SendMessage(UserInfo.getId(),UserInfo.getGroupId(),getMsg(Url,type,time_Long));
                     }
                 }).start();
             } catch (Exception e) {
@@ -388,6 +388,19 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
             }
         }
     }
+
+    private String getMsg(String url,int type,String voice_time){
+        JSONObject jsonObject=new JSONObject();
+        try {
+            jsonObject.put("msg",url);
+            jsonObject.put("type",type);
+            jsonObject.put("voice_time",voice_time);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
     //相册
     @Click(R.id.btn_album)
     void album(){
@@ -413,8 +426,7 @@ public class SendMessage extends AppCompatActivity implements sendPicture, Expen
     @Background
     public void sendText(String text, Chat newChat,int type)  {
         try {
-            newChat.sendMessage(text+type+"size"+time_Long);
-
+            newChat.sendMessage(getMsg(text,type,time_Long));
         } catch (XMPPException e) {
             e.printStackTrace();
         }
