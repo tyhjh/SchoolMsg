@@ -65,6 +65,8 @@ public class ChatService extends Service {
 
     Runnable runnable;
 
+    public static String TAG="ChatService";
+
     String userIp = "@120.27.49.173";
 
     static NotificationManager mNotificationManager;
@@ -74,6 +76,7 @@ public class ChatService extends Service {
     public static XMPPConnection getConnection() {
         return xmppConnection;
     }
+
 
     public ChatService() {
     }
@@ -297,10 +300,13 @@ public class ChatService extends Service {
 
         JSONObject jsonObject = null;
         try {
+            Log.e(TAG,message.getBody());
             jsonObject = new JSONObject(message.getBody());
             String messageBody = jsonObject.getString("msg");
             int type = jsonObject.getInt("type");
-            String count = jsonObject.getString("voice_time");
+            String count=null;
+            if(type==2)
+                count = jsonObject.getString("voice_time");
             String messageFrom = message.getFrom().substring(0, message.getFrom().lastIndexOf(divi));
             Msg_chat msg_chat;
             byte[] drawable = null;

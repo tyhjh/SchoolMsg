@@ -59,8 +59,6 @@ public class UserInfo {
     private static String groupId;
 
 
-
-
     public static boolean canDo() {
         if (xmppConnection != null && xmppConnection.isConnected())
             return true;

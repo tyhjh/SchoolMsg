@@ -25,14 +25,19 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.tyhj.schoolmsg.R;
 import com.google.zxing.Result;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -61,12 +66,12 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 	private CaptureActivityHandler handler;
 	private InactivityTimer inactivityTimer;
 	private BeepManager beepManager;
-
+	private Button btn_allow;
 	private SurfaceView scanPreview = null;
 	private RelativeLayout scanContainer;
 	private RelativeLayout scanCropView;
 	private ImageView scanLine;
-
+	JSONObject jsonObject;
 	private Rect mCropRect = null;
 
 	public Handler getHandler() {
@@ -87,7 +92,7 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 		scanContainer = (RelativeLayout) findViewById(R.id.capture_container);
 		scanCropView = (RelativeLayout) findViewById(R.id.capture_crop_view);
 		scanLine = (ImageView) findViewById(R.id.capture_scan_line);
-
+		btn_allow= (Button) findViewById(R.id.btn_allow);
 		inactivityTimer = new InactivityTimer(this);
 		beepManager = new BeepManager(this);
 
@@ -97,6 +102,19 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 		animation.setRepeatCount(-1);
 		animation.setRepeatMode(Animation.RESTART);
 		scanLine.startAnimation(animation);
+
+
+
+		btn_allow.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				if(btn_allow.getVisibility()==View.VISIBLE)
+					btn_allow.setVisibility(View.GONE);
+				allow(jsonObject);
+				Toast.makeText(CaptureActivity.this,"已允许",Toast.LENGTH_SHORT).show();
+				CaptureActivity.this.finish();
+			}
+		});
 	}
 
 	@Override
@@ -182,16 +200,35 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 		beepManager.playBeepSoundAndVibrate();
 		//bundle.putString("result", rawResult.getText());
 		//startActivity(new Intent(CaptureActivity.this, ResultActivity.class).putExtras(bundle));
-
-		Log.e("二维码",rawResult.getText());
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				MyHttp.twoCode(rawResult.getText());
+		try {
+			String code =rawResult.getText();
+			jsonObject=new JSONObject(rawResult.getText());
+			Log.e("二维码",code);
+			if (jsonObject==null) {
+				Toast.makeText(CaptureActivity.this,"我不想扫这种码",Toast.LENGTH_SHORT).show();
+				CaptureActivity.this.finish();
+				return;
 			}
-		}).start();
-		Toast.makeText(CaptureActivity.this,"登录完成",Toast.LENGTH_SHORT).show();
-		CaptureActivity.this.finish();
+			jsonObject=new JSONObject(rawResult.getText());
+			btn_allow.setVisibility(View.VISIBLE);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void allow(JSONObject jsonObject) {
+		try {
+			final String url = jsonObject.getString("url");
+			final String action=jsonObject.getString("action");
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					MyHttp.twoCode(url,action);
+				}
+			}).start();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void initCamera(SurfaceHolder surfaceHolder) {
@@ -301,5 +338,21 @@ public final class CaptureActivity extends Activity implements SurfaceHolder.Cal
 			e.printStackTrace();
 		}
 		return 0;
+	}
+
+	@Override
+	public void onBackPressed() {
+		if(btn_allow.getVisibility()==View.VISIBLE){
+			btn_allow.setVisibility(View.GONE);
+			try {
+				jsonObject.put("code","reject");
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			allow(jsonObject);
+			Toast.makeText(CaptureActivity.this,"已拒绝",Toast.LENGTH_SHORT).show();
+			CaptureActivity.this.finish();
+		}else
+			super.onBackPressed();
 	}
 }
