@@ -7,6 +7,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.avos.avoscloud.AVOSCloud;
+import com.tencent.android.tpush.XGPushManager;
 
 import myViews.CircularAnim;
 import publicinfo.Group;
@@ -27,6 +28,9 @@ public class Application extends android.app.Application {
         //如果使用美国节点，请加上这行代码 AVOSCloud.useAVCloudUS();
         AVOSCloud.initialize(this, "Yi6HruJsj4h2bufroQKC9kJT-gzGzoHsz", "2nWoF8MhHN6kibFs72bVhLWV");
         this.context=getApplicationContext();
+        Context context = getApplicationContext();
+        XGPushManager.registerPush(context);
+        
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {

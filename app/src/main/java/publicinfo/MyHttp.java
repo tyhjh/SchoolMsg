@@ -188,5 +188,19 @@ public class MyHttp {
         JSONObject jsonObject=getJson(date,url,"POST");
     }
 
+
+    //获取标签
+    public static void getTags(){
+        String url=ipAddress+"/v1.0/users/"+UserInfo.getId()+"/tags";
+        JSONObject jsonObject=getJson(null,url,"GET");
+        try {
+            if(jsonObject!=null&&jsonObject.getInt("code")==200){
+                UserInfo.setTags(jsonObject.getJSONObject("data").getString("tagid"));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 

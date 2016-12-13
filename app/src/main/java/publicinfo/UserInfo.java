@@ -14,6 +14,7 @@ import com.avos.avoscloud.AVQuery;
 import com.avos.avoscloud.DeleteCallback;
 import com.avos.avoscloud.FindCallback;
 import com.avos.avoscloud.GetCallback;
+import com.tencent.android.tpush.XGPushManager;
 import com.tyhj.myfist_2016_6_29.MyTime;
 
 import org.jivesoftware.smack.AccountManager;
@@ -58,6 +59,7 @@ public class UserInfo {
     private static String SERVER_NAME = "120.27.49.173";
     private static String groupId;
 
+    private static String tags;
 
     public static boolean canDo() {
         if (xmppConnection != null && xmppConnection.isConnected())
@@ -80,8 +82,6 @@ public class UserInfo {
     static String id;
     //连接
     static XMPPConnection xmppConnection;
-    // 加入组的名字
-    static String groupName;
 
     //
     private static void setXmppConnection() {
@@ -128,7 +128,8 @@ public class UserInfo {
             editor.putString("pas", pas);
             editor.commit();
             UserInfo.id = name;
-            UserInfo.groupName = name + MyFunction.getTime();
+            MyHttp.getTags();
+            XGPushManager.setTag(context,tags);
             return true;
         } catch (XMPPException e) {
             e.printStackTrace();
@@ -149,9 +150,8 @@ public class UserInfo {
 
             SharedPreferences shared = context.getSharedPreferences("login", Context.MODE_PRIVATE);
             UserInfo.id = shared.getString("name", null);
-            UserInfo.groupName = id + MyFunction.getTime();
-
-
+            MyHttp.getTags();
+            XGPushManager.setTag(context,tags);
             if (!canDo())
                 setXmppConnection();
             if (!canDo())
@@ -529,10 +529,6 @@ public class UserInfo {
         return xmppConnection;
     }
 
-    public static String getGroupName() {
-        return groupName;
-    }
-
     //将drawable转换成可以用来存储的byte[]类型
     public static byte[] getPicture(Drawable drawable) {
         if (drawable == null) {
@@ -551,5 +547,14 @@ public class UserInfo {
 
     public static void setGroupId(String groupId) {
         UserInfo.groupId = groupId;
+    }
+
+
+    public static String getTags() {
+        return tags;
+    }
+
+    public static void setTags(String tags) {
+        UserInfo.tags = tags;
     }
 }
